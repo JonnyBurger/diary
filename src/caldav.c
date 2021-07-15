@@ -620,7 +620,6 @@ int caldav_sync(struct tm* date,
                  size_t dir_size,
                  bool confirm) {
     pthread_t progress_tid;
-    pthread_create(&progress_tid, NULL, show_progress, (void*)header);
 
     // fetch existing API tokens
     char* tokfile = read_tokenfile();
@@ -642,6 +641,8 @@ int caldav_sync(struct tm* date,
         // get acess token using code and verifier
         get_access_token(code, challenge, false);
     }
+
+    pthread_create(&progress_tid, NULL, show_progress, (void*)header);
 
     char* principal_postfields = "<d:propfind xmlns:d='DAV:' xmlns:cs='http://calendarserver.org/ns/'>"
                                  "<d:prop><d:current-user-principal/></d:prop>"

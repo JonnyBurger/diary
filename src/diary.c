@@ -303,7 +303,7 @@ int main(int argc, char** argv) {
     config_home = getenv("XDG_CONFIG_HOME");
     if (config_home == NULL) config_home = XDG_CONFIG_HOME_FALLBACK;
     // concat config home with the file path to the config file
-    config_file_path = (char *) calloc(strlen(config_home) + strlen(CONFIG_FILE_PATH) + 1, sizeof(char));
+    config_file_path = (char *) calloc(strlen(config_home) + strlen(CONFIG_FILE_PATH) + 2, sizeof(char));
     sprintf(config_file_path, "%s/%s", config_home, CONFIG_FILE_PATH);
     // read config from config file path
     read_config(config_file_path);

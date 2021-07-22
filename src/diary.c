@@ -681,6 +681,7 @@ int main(int argc, char** argv) {
         }
     } while (ch != 'q');
 
+    free(config_file_path);
     endwin();
     system("clear");
     return 0;

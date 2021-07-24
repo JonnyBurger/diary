@@ -5,8 +5,6 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-env:
-  SSH_AUTH_SOCK: $RUNNER_TEMP/ssh-agent.sock
 
 jobs:
   man:
@@ -19,12 +17,15 @@ jobs:
     - name: Create html from man doc
       run: mandoc -Thtml man1/diary.1 > man1/diary.1.html
     - name: Add ssh key
+      env:
+        SSH_AUTH_SOCK: $RUNNER_TEMP/ssh-agent.sock
       # https://www.webfactory.de/blog/use-ssh-key-for-private-repositories-in-github-actions
       run: |
-        eval "$(ssh-agent -a ${{ env.SSH_AUTH_SOCK }})"
+        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
         ls -l $RUNNER_TEMP
-        ls -l ${{ env.SSH_AUTH_SOCK }}
-        
+        ls -l $SSH_AUTH_SOCK
         ssh-add - <<< "${{ secrets.SSH_B64 }}"
     - name: Send html to website
+      env:
+        SSH_AUTH_SOCK: $RUNNER_TEMP/ssh-agent.sock
       run: scp man1/diary.1.html hcloud@diary.in0rdr.ch:/home/hcloud/

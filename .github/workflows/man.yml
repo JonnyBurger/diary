@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ master ]
 env:
-  SSH_AUTH_SOCK: /$RUNNER_TEMP/ssh-agent.sock
+  SSH_AUTH_SOCK: $RUNNER_TEMP/ssh-agent.sock
 
 jobs:
   man:
@@ -22,7 +22,7 @@ jobs:
       # https://www.webfactory.de/blog/use-ssh-key-for-private-repositories-in-github-actions
       run: |
         ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-        ls -l /$RUNNER_TEMP/
+        ls -l $RUNNER_TEMP/
         ls -l $SSH_AUTH_SOCK
         
         ssh-add - <<< "${{ secrets.SSH_B64 }}"

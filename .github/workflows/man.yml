@@ -21,7 +21,7 @@ jobs:
     - name: Add ssh key
       # https://www.webfactory.de/blog/use-ssh-key-for-private-repositories-in-github-actions
       run: |
-        ssh-agent -a ${{ env.SSH_AUTH_SOCK }} > /dev/null
+        ssh-agent -a ${{ env.SSH_AUTH_SOCK }}
         ls -l $RUNNER_TEMP
         ls -l ${{ env.SSH_AUTH_SOCK }}
         

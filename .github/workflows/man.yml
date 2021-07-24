@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Install mandoc
-      run: sudo apt-get install mandoc && ls -l
+      run: sudo apt-get install mandoc && ls -l && pwd
     - name: Create html from man doc
       run: mandoc -Thtml man/diary.1 > man/diary.1.html
     - name: Send html to website

@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - name: Check out repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v2 && echo pwd && echo $GITHUB_WORKSPACE && ls -l
     - name: Install mandoc
       run: sudo apt-get install mandoc
     - name: Create html from man doc

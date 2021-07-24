@@ -19,4 +19,4 @@ jobs:
     - name: Send html to website
       env:
         SSH_B64: ${{ secrets.SSH_B64 }}
-      run: scp -i $(echo $SSH_B64 | base64 -d) man1/diary.1.html hcloud@diary.in0rdr.ch:/home/hcloud/
+      run: scp -i <(echo $SSH_B64 | base64 -d) man1/diary.1.html hcloud@diary.in0rdr.ch:/home/hcloud/

@@ -1,0 +1,20 @@
+name: Man page
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  man:
+    runs-on: ubuntu-20.04
+    steps:
+    - name: Install mandoc
+      run: sudo apt-get install mandoc
+    - name: Create html from man doc
+      run: mandoc -Thtml man/diary.1 > man/diary.1.html
+    - name: Send html to website
+      env:
+        SSH_B64: ${{ secrets.SSH_B64 }}
+      run: scp -i $(echo $SSH_B64 | base64 -d) man/diary.1.html hcloud@diary.in0rdr.ch:/home/hcloud/

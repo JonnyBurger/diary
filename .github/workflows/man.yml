@@ -10,8 +10,10 @@ jobs:
   man:
     runs-on: ubuntu-20.04
     steps:
+    - name: Check out repository
+      uses: actions/checkout@v2
     - name: Install mandoc
-      run: sudo apt-get install mandoc && ls -l && pwd
+      run: sudo apt-get install mandoc
     - name: Create html from man doc
       run: mandoc -Thtml man/diary.1 > man/diary.1.html
     - name: Send html to website

@@ -22,7 +22,7 @@ jobs:
       # https://www.webfactory.de/blog/use-ssh-key-for-private-repositories-in-github-actions
       run: |
         ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-        ssh-add - <<< "${{ secrets.SSH_B64 }}"
+        ssh-add - <<< $(echo "${{ secrets.SSH_B64 }}" | base64 -d)
     - name: Send html to website
       env:
         SSH_AUTH_SOCK: /tmp/ssh-agent.sock

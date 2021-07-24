@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [ master ]
 env:
-  SSH_AUTH_SOCK: $RUNNER_TEMP/ssh-agent.sock"
+  SSH_AUTH_SOCK: $RUNNER_TEMP/ssh-agent.sock
 
 jobs:
   man:

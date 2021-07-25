@@ -7,7 +7,7 @@ This file holds notes for testing purposes.
 ### Plain Text
 Generate plain text from "runoff" text:
 ```bash
-tbl man/diary.1 | nroff -man | less
+tbl man1/diary.1 | nroff -man | less
 ```
 
 ### `mandoc` HTML (preferred)
@@ -18,7 +18,7 @@ sudo apt-get install mandoc
 
 Generate HTML file:
 ```bash
-mandoc -Thtml man/diary.1 > man/diary.1.html
+mandoc -Thtml man1/diary.1 > man1/diary.1.html
 ```
 
 ### `groff` HTML
@@ -29,5 +29,5 @@ sudo apt-get install groff
 
 Generate HTML file (`-t` for `tbl`):
 ```bash
-groff -t -mandoc -Thtml man/diary.1 > man/diary.1.html
+groff -t -mandoc -Thtml man1/diary.1 > man1/diary.1.html
 ```

@@ -26,4 +26,4 @@ jobs:
     - name: Send html to website
       env:
         SSH_AUTH_SOCK: /tmp/ssh-agent.sock
-      run: scp man1/diary.1.html hcloud@diary.in0rdr.ch:/home/hcloud/
+      run: scp -o StrictHostKeyChecking=no man1/diary.1.html hcloud@diary.in0rdr.ch:/home/hcloud/

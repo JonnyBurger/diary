@@ -17,7 +17,7 @@ jobs:
     - name: Create html from man doc
       run: mandoc -Thtml man1/diary.1 > man1/diary.1.html
     - name: Commit new man doc
-    - run: |
+      run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add man1/diary.1.html

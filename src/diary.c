@@ -274,10 +274,10 @@ bool read_config(const char* file_path) {
 }
 
 void usage() {
-  printf("Usage : diary [OPTION]... [DIRECTORY]...\n");
+  printf("Diary v%s: Text-based journaling program\n", DIARY_VERSION);
+  printf("Edit journal entries from the command line.\n");
   printf("\n");
-  printf("Diary, journaling TUI (v%s)\n", DIARY_VERSION);
-  printf("Edit journal entries from the command line\n");
+  printf("Usage : diary [OPTION]... [DIRECTORY]...\n");
   printf("\n");
   printf("Options:\n");
   printf("  -v, --version                 : Print diary version\n");

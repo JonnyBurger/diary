@@ -21,5 +21,5 @@ jobs:
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add man1/diary.1.html
-        git commit -m "refresh diary manpage"
+        git diff-index --quiet HEAD || git commit -m "refresh diary manpage"
         git push

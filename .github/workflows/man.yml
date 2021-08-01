@@ -16,14 +16,10 @@ jobs:
       run: sudo apt-get install mandoc
     - name: Create html from man doc
       run: mandoc -Thtml man1/diary.1 > man1/diary.1.html
-    - name: Add ssh key
-      env:
-        SSH_AUTH_SOCK: /tmp/ssh-agent.sock
-      # https://www.webfactory.de/blog/use-ssh-key-for-private-repositories-in-github-actions
+    - name: Commit new man doc
       run: |
-        ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-        ssh-add - <<< $(echo "${{ secrets.SSH_B64 }}" | base64 -d)
-    - name: Send html to website
-      env:
-        SSH_AUTH_SOCK: /tmp/ssh-agent.sock
-      run: scp -o StrictHostKeyChecking=no man1/diary.1.html hcloud@diary.in0rdr.ch:/home/hcloud/diary-website/man.html
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add man1/diary.1.html
+        git commit -m "refresh diary manpage"
+        git push

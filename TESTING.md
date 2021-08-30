@@ -2,6 +2,18 @@
 
 This file holds notes for testing purposes.
 
+## Send stderr to File
+
+Send stderr to a file for debugging:
+```bash
+diary 2>log.txt
+```
+
+Or to `/dev/null` to ignore the debug messages flickering on the screen:
+```bash
+diary 2>/dev/null
+```
+
 ## Render Documentation / Man Page
 
 ### Plain Text

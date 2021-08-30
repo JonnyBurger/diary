@@ -169,7 +169,7 @@ This key is empty by default and the only configuration key required for setting
 
 ### Google Calendar OAuth2
 
-The Google Calendar CalDAV API is protected with OAuth2.
+The Google Calendar [CalDAV API is protected with OAuth2](https://developers.google.com/identity/protocols/oauth2).
 
 The credentials and the consent screen can be redefined at [compile time](#Build) or with the following keys in the [configuration file](#Configuration-File):
 

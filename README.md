@@ -56,7 +56,7 @@ This is a text-based diary, inspired by [khal](https://github.com/pimutils/khal)
 
 ## Install
 
-Pre-built packages can be installed from the [Open Build Service (OBS)]((https://software.opensuse.org/download.html?project=home%3Ain0rdr&package=diary))
+Pre-built packages can be installed from the [Open Build Service (OBS)](https://software.opensuse.org/download.html?project=home%3Ain0rdr&package=diary)
 * Install the `diary` package for a stable releases
 * Install the `diary-nightly` build to use a more recent but possibly unstable version from the master branch
 

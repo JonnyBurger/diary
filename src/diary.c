@@ -474,6 +474,8 @@ int main(int argc, char** argv) {
     int ch, conf_ch;
     int pad_pos = 0;
     int syear = 0, smonth = 0, sday = 0;
+    char ics_input_filepath[256];
+    char* expanded_ics_input_filepath;
     struct tm new_date;
     int prev_width = COLS - ASIDE_WIDTH - CAL_WIDTH;
     int prev_height = LINES - 1;
@@ -665,6 +667,19 @@ int main(int argc, char** argv) {
                     }
                     it.tm_mday++;
                 }
+                break;
+            // import from ics file
+            case 'i':
+                wclear(header);
+                curs_set(2);
+                mvwprintw(header, 0, 0, "Import from file: ");
+                if (wscanw(header, "%s", &ics_input_filepath) == 1) {
+                    // fprintf(stderr, "ICS input file: %s\n", ics_input_filepath);
+                    expanded_ics_input_filepath = expand_path(ics_input_filepath);
+                    ics_import(expanded_ics_input_filepath);
+                    free(expanded_ics_input_filepath);
+                }
+                curs_set(0);
                 break;
         }
 

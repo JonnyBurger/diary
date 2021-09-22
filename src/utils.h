@@ -30,6 +30,7 @@ char* extract_ical_field(const char* ical, char* key, bool multline);
 char* expand_path(const char* str);
 char* strrstr(char *haystack, char *needle);
 void fpath(const char* dir, size_t dir_size, const struct tm* date, char** rpath, size_t rpath_size);
+void ics_import(const char* ics_input);
 
 typedef struct
 {

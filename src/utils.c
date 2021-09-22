@@ -319,6 +319,27 @@ void fpath(const char* dir, size_t dir_size, const struct tm* date, char** rpath
     strcat(*rpath, dstr);
 }
 
+/* Import journal entries from an ics file */
+void ics_import(const char* ics_input) {
+    FILE* pfile = fopen(ics_input, "r");
+
+    fseek(pfile, 0, SEEK_END);
+    long ics_bytes = ftell(pfile) + 1;
+    rewind(pfile);
+
+    char* ics = malloc(ics_bytes);
+    fread(ics, 1, ics_bytes, pfile);
+    fclose(pfile);
+
+    ics[ics_bytes] = 0;
+    // fprintf(stderr, "Import ICS file: %s\n", ics);
+
+
+    char* desc = extract_ical_field(ics, "DESCRIPTION", true);
+    fprintf(stderr, "Import DESCRIPTION: %s\n", desc);
+    free (desc);
+}
+
 config CONFIG = {
     .range = 1,
     .weekday = 1,

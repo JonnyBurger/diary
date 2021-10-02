@@ -17,6 +17,7 @@
 #include <locale.h>
 #include <langinfo.h>
 #include "utils.h"
+#include "import.h"
 #include "caldav.h"
 
 #define XDG_CONFIG_HOME_FALLBACK "~/.config"

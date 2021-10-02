@@ -210,7 +210,10 @@ char* unfold(const char* str) {
     return buf;
 }
 
-char* extract_ical_field(const char* ics, char* key, bool multiline) {
+/* Find ical key in string. The value of 'start_pos' is set to the start position
+   of the value (match) after the colon (':').
+*/
+char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multiline) {
     regex_t re;
     regmatch_t pm[1];
     char key_regex[strlen(key) + 1];
@@ -241,21 +244,34 @@ char* extract_ical_field(const char* ics, char* key, bool multiline) {
             fprintf(stderr, "Extracted ical result value: %s\n", res);
             fprintf(stderr, "Extracted ical result size: %li\n", strlen(res));
 
+            fprintf(stderr, "Sizeof ics: %li\n", strlen(ics));
+            fprintf(stderr, "Start pos: %li\n", *start_pos);
+            fprintf(stderr, "Res: %s\n", res);
+            *start_pos = res - icscp;
+            fprintf(stderr, "Start pos: %li\n", *start_pos);
+
             if (strlen(res) == 0) {
-                // empty remote description
+                // empty remote value
                 res = NULL;
             } else if (multiline) {
-                res = unfold(ics + (res - icscp));
+                res = unfold(icscp + *start_pos);
             }
             break;
         }
         // key not in this line, advance line
         res = strtok(NULL, "\n");
     }
-    fprintf(stderr, "Sizeof ics: %li\n", strlen(ics));
 
+    char* buf = malloc(strlen(res) + 1);
+    if (buf == NULL) {
+        perror("malloc failed");
+        return NULL;
+    }
+    strcpy(buf, res);
+
+    regfree(&re);
     free(icscp);
-    return res;
+    return buf;
 }
 
 // Return expanded file path
@@ -317,27 +333,6 @@ void fpath(const char* dir, size_t dir_size, const struct tm* date, char** rpath
         return;
     }
     strcat(*rpath, dstr);
-}
-
-/* Import journal entries from an ics file */
-void ics_import(const char* ics_input) {
-    FILE* pfile = fopen(ics_input, "r");
-
-    fseek(pfile, 0, SEEK_END);
-    long ics_bytes = ftell(pfile) + 1;
-    rewind(pfile);
-
-    char* ics = malloc(ics_bytes);
-    fread(ics, 1, ics_bytes, pfile);
-    fclose(pfile);
-
-    ics[ics_bytes] = 0;
-    // fprintf(stderr, "Import ICS file: %s\n", ics);
-
-
-    char* desc = extract_ical_field(ics, "DESCRIPTION", true);
-    fprintf(stderr, "Import DESCRIPTION: %s\n", desc);
-    free (desc);
 }
 
 config CONFIG = {

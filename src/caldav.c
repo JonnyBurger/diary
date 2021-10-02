@@ -761,21 +761,24 @@ int caldav_sync(struct tm* date,
 
     struct tm remote_datetime;
     time_t remote_date;
+    long search_pos = 0;
 
     // check remote LAST-MODIFIED:20210521T212441Z of remote event
-    char* remote_last_mod = extract_ical_field(event, "LAST-MODIFIED", false);
-    char* remote_uid = extract_ical_field(event, "UID", false);
-    fprintf(stderr, "Remote last modified: %s\n", remote_last_mod);
-    fprintf(stderr, "Remote UID: %s\n", remote_uid);
-    if (remote_last_mod == NULL) {
+    char* remote_last_mod = extract_ical_field(event, "LAST-MODIFIED", &search_pos, false);
+    char* remote_uid = extract_ical_field(event, "UID", &search_pos, false);
+
+    if (remote_last_mod == NULL || remote_uid == NULL) {
         remote_file_exists = false;
     } else {
+        fprintf(stderr, "Remote last modified: %s\n", remote_last_mod);
+        fprintf(stderr, "Remote UID: %s\n", remote_uid);
         strptime(remote_last_mod, "%Y%m%dT%H%M%SZ", &remote_datetime);
         //remote_datetime.tm_isdst = -1;
         fprintf(stderr, "Remote dst: %i\n", remote_datetime.tm_isdst);
         remote_date = mktime(&remote_datetime);
         fprintf(stderr, "Remote dst: %i\n", remote_datetime.tm_isdst);
         fprintf(stderr, "Remote last modified: %s\n", ctime(&remote_date));
+        free(remote_last_mod);
     }
 
     if (! (local_file_exists || remote_file_exists)) {
@@ -788,7 +791,7 @@ int caldav_sync(struct tm* date,
     double timediff = difftime(localfile_date, remote_date);
     fprintf(stderr, "Time diff between local and remote mod time:%e\n", timediff);
 
-    if ((timediff > 0 && local_file_exists) || (local_file_exists && !remote_file_exists)) {
+    if (local_file_exists && (timediff > 0 || !remote_file_exists)) {
         // local time > remote time
         // if local file mod time more recent than LAST-MODIFIED
 
@@ -811,8 +814,8 @@ int caldav_sync(struct tm* date,
     char* rmt_desc;
     char dstr[16];
     int conf_ch;
-    if ((timediff < 0 && remote_file_exists) || (!local_file_exists && remote_file_exists)) {
-        rmt_desc = extract_ical_field(event, "DESCRIPTION", true);
+    if (remote_file_exists && (timediff < 0 || !local_file_exists)) {
+        rmt_desc = extract_ical_field(event, "DESCRIPTION", &search_pos, true);
         fprintf(stderr, "Remote event description:%s\n", rmt_desc);
 
         if (rmt_desc == NULL) {

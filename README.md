@@ -33,6 +33,7 @@ This is a text-based diary, inspired by [khal](https://github.com/pimutils/khal)
     d, x      delete current entry
     s         sync current entry with CalDAV server (ALPHA)
     S         sync all entries with CalDAV server (ALPHA)
+    i         import entries from .ics file (ALPHA)
 
     t         jump to today
     f         jump to or find specific day

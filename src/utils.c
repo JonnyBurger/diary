@@ -169,6 +169,12 @@ char* unfold(const char* str) {
 
     char* res = strtok(strcp, "\n");
 
+    if (res == NULL) {
+        fprintf(stderr, "No more lines in multiline string, stop unfolding.\n");
+        free(strcp);
+        return NULL;
+    }
+
     char* buf = malloc(strlen(res) + 1);
     if (buf == NULL) {
         perror("malloc failed");
@@ -188,6 +194,11 @@ char* unfold(const char* str) {
     while (res != NULL) {
         res = strtok(NULL, "\n");
 
+        if (res == NULL) {
+            fprintf(stderr, "No more lines in multiline string, stop unfolding.\n");
+            break;
+        }
+
         if (regexec(&re, res, 1, pm, 0) == 0) {
             // Stop unfolding if line does not start with white space/tab:
             // https://datatracker.ietf.org/doc/html/rfc2445#section-4.1
@@ -195,10 +206,9 @@ char* unfold(const char* str) {
         }
 
         newbuf = realloc(buf, strlen(buf) + strlen(res) + 1);
-        if (buf == NULL) {
+        if (newbuf == NULL) {
             perror("realloc failed");
-            free(buf);
-            return NULL;
+            break;
         } else {
             buf = newbuf;
             strcat(buf, res + 1);
@@ -249,28 +259,33 @@ char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multi
             fprintf(stderr, "Res: %s\n", res);
             *start_pos = res - icscp;
             fprintf(stderr, "Start pos: %li\n", *start_pos);
-
-            if (strlen(res) == 0) {
-                // empty remote value
-                res = NULL;
-            } else if (multiline) {
-                res = unfold(icscp + *start_pos);
-            }
             break;
         }
         // key not in this line, advance line
         res = strtok(NULL, "\n");
     }
 
-    char* buf = malloc(strlen(res) + 1);
-    if (buf == NULL) {
-        perror("malloc failed");
-        return NULL;
+    char* buf = NULL;
+
+    if (res != NULL) {
+        if (strlen(res) == 0) {
+            // empty remote value
+            buf = NULL;
+        } else if (multiline) {
+            buf = unfold(icscp + *start_pos);
+        } else {
+            buf = malloc(strlen(res) + 1);
+            if (buf == NULL) {
+                perror("malloc failed");
+                return NULL;
+            }
+            strcpy(buf, res);
+        }
     }
-    strcpy(buf, res);
 
     regfree(&re);
     free(icscp);
+
     return buf;
 }
 

@@ -753,7 +753,9 @@ int caldav_sync(struct tm* date,
     }
     struct tm* localfile_time = gmtime(&attr.st_mtime);
     fprintf(stderr, "Local dst: %i\n", localfile_time->tm_isdst);
-    //local_time->tm_isdst = -1;
+    // set to negative value, so mktime uses timezone information and system databases
+    // to attempt to determine whether DST is in effect at the specified time
+    localfile_time->tm_isdst = -1;
     time_t localfile_date = mktime(localfile_time);
     fprintf(stderr, "Local dst: %i\n", localfile_time->tm_isdst);
     fprintf(stderr, "Local file last modified time: %s\n", ctime(&localfile_date));

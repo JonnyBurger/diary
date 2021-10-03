@@ -664,7 +664,7 @@ int caldav_sync(struct tm* date,
 
     char* tokenfile_path = expand_path(CONFIG.google_tokenfile);
     if (user_principal == NULL) {
-        fprintf(stderr, "Unable to fetch principal due to invalid tokenfile. Removing tokenfile '%s'.\n", CONFIG.google_tokenfile);
+        fprintf(stderr, "Unable to fetch principal. Offline or invalid tokenfile. Removing tokenfile '%s'.\n", CONFIG.google_tokenfile);
 
         wclear(header);
         mvwprintw(header, 0, 0, "Invalid Google OAuth2 credentials, removing tokenfile at '%s'. Please retry.", CONFIG.google_tokenfile);

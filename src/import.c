@@ -36,7 +36,7 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
         vevent = extract_ical_field(i, "BEGIN:VEVENT", &search_pos, false);
         vevent_date = extract_ical_field(i, "DTSTART", &search_pos, false);
         vevent_desc = extract_ical_field(i, "DESCRIPTION", &search_pos, true);
-        if (vevent == NULL) {
+        if (vevent == NULL || vevent_desc == NULL) {
             break;
         }
 

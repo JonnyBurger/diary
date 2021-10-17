@@ -272,7 +272,7 @@ char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multi
             // empty remote value
             buf = NULL;
         } else if (multiline) {
-            buf = unfold(icscp + *start_pos);
+            buf = unfold(ics + *start_pos);
         } else {
             buf = malloc(strlen(res) + 1);
             if (buf == NULL) {
@@ -348,6 +348,61 @@ void fpath(const char* dir, size_t dir_size, const struct tm* date, char** rpath
         return;
     }
     strcat(*rpath, dstr);
+}
+
+bool go_to(WINDOW* calendar, WINDOW* aside, time_t date, int* cur_pad_pos, struct tm* curs_date, struct tm* cal_start, struct tm* cal_end) {
+    if (date < mktime(cal_start) || date > mktime(cal_end))
+        return false;
+
+    int diff_seconds = date - mktime(cal_start);
+    int diff_days = diff_seconds / 60 / 60 / 24;
+    int diff_weeks = diff_days / 7;
+    int diff_wdays = diff_days % 7;
+
+    localtime_r(&date, curs_date);
+
+    int cy, cx;
+    getyx(calendar, cy, cx);
+
+    // remove the STANDOUT attribute from the day we are leaving
+    chtype current_attrs = mvwinch(calendar, cy, cx) & A_ATTRIBUTES;
+    // leave every attr as is, but turn off STANDOUT
+    current_attrs &= ~A_STANDOUT;
+    mvwchgat(calendar, cy, cx, 2, current_attrs, 0, NULL);
+
+    // add the STANDOUT attribute to the day we are entering
+    chtype new_attrs =  mvwinch(calendar, diff_weeks, diff_wdays * 3) & A_ATTRIBUTES;
+    new_attrs |= A_STANDOUT;
+    mvwchgat(calendar, diff_weeks, diff_wdays * 3, 2, new_attrs, 0, NULL);
+
+    if (diff_weeks < *cur_pad_pos)
+        *cur_pad_pos = diff_weeks;
+    if (diff_weeks > *cur_pad_pos + LINES - 2)
+        *cur_pad_pos = diff_weeks - LINES + 2;
+    prefresh(aside, *cur_pad_pos, 0, 1, 0, LINES - 1, ASIDE_WIDTH);
+    prefresh(calendar, *cur_pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
+
+    return true;
+}
+
+
+void* show_progress(void* vargp){
+    WINDOW* header = (WINDOW*) vargp;
+    mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 11, "   syncing ");
+    for(;;) {
+        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "|");
+        wrefresh(header);
+        usleep(200000);
+        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "/");
+        wrefresh(header);
+        usleep(200000);
+        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "-");
+        wrefresh(header);
+        usleep(200000);
+        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "\\");
+        wrefresh(header);
+        usleep(200000);
+    }
 }
 
 config CONFIG = {

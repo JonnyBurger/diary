@@ -587,25 +587,6 @@ void put_event(struct tm* date, const char* dir, size_t dir_size, char* calendar
     }
 }
 
-void* show_progress(void* vargp){
-    WINDOW* header = (WINDOW*) vargp;
-    mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 11, "   syncing ");
-    for(;;) {
-        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "|");
-        wrefresh(header);
-        usleep(200000);
-        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "/");
-        wrefresh(header);
-        usleep(200000);
-        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "-");
-        wrefresh(header);
-        usleep(200000);
-        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "\\");
-        wrefresh(header);
-        usleep(200000);
-    }
-}
-
 /*
 * Sync with CalDAV server.
 * Returns the answer char of the confirmation dialogue
@@ -837,7 +818,7 @@ int caldav_sync(struct tm* date,
 
         // ask for confirmation
         strftime(dstr, sizeof dstr, CONFIG.fmt, date);
-        mvwprintw(header, 0, 0, "Remote event is more recent. Sync entry '%s' and overwrite local file? [(Y)es/(a)all/(n)o/(c)ancel] ", dstr);
+        mvwprintw(header, 0, 0, "Remote event is more recent. Sync entry '%s' and overwrite local file? [(Y)es/(a)ll/(n)o/(c)ancel] ", dstr);
         char* i;
         bool conf = false;
         while (!conf) {

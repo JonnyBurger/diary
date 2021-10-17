@@ -1,6 +1,6 @@
 workflow:
   steps:
-    - branch_package:
+    - rebuild_package:
         source_project: home:in0rdr
         source_package: diary-nightly
   filters:

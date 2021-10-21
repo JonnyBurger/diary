@@ -32,6 +32,9 @@ default: $(TARGET)
 $(TARGET): $(SRC)
 	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIBS)
 
+debug: $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) -g $(LIBS)
+
 clean:
 	rm -f $(TARGET)
 

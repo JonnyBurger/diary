@@ -154,10 +154,6 @@ char* fold(const char* str) {
 
 char* unfold(const char* str) {
     fprintf(stderr, "Before unfolding: %s\n", str);
-    //if (strcmp(str, "")) {
-    //    fputs("Unfold string is empty.\n", stderr);
-    //    return NULL;
-    //}
 
     // work on a copy of the str
     char* strcp = (char *) malloc(strlen(str) * sizeof(char) + 1);

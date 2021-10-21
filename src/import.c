@@ -11,10 +11,10 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
     }
 
     fseek(pfile, 0, SEEK_END);
-    long ics_bytes = ftell(pfile) + 1;
+    long ics_bytes = ftell(pfile);
     rewind(pfile);
 
-    char* ics = malloc(ics_bytes);
+    char* ics = malloc(ics_bytes + 1);
     fread(ics, 1, ics_bytes, pfile);
     fclose(pfile);
 
@@ -26,13 +26,13 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
     struct tm date;
 
     long search_pos = 0;
-    char *i = ics;
     char* vevent;
     char* vevent_date;
     char* vevent_desc;
 
     // find all VEVENTs and write to files
-    for (;;) {
+    char *i = ics;
+    while (i < ics + ics_bytes) {
         vevent = extract_ical_field(i, "BEGIN:VEVENT", &search_pos, false);
         vevent_date = extract_ical_field(i, "DTSTART", &search_pos, false);
         vevent_desc = extract_ical_field(i, "DESCRIPTION", &search_pos, true);
@@ -42,7 +42,7 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
 
         i += search_pos;
 
-        fprintf(stderr, "VEVENT DESCRIPTION: \n\n%s\n\n", vevent_desc);
+        // fprintf(stderr, "VEVENT DESCRIPTION: \n\n%s\n\n", vevent_desc);
 
         // parse date
         strptime(vevent_date, "%Y%m%dT%H%M%SZ", &date);
@@ -53,6 +53,11 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
         char* ppath = path;
         fpath(CONFIG.dir, strlen(CONFIG.dir), &date, &ppath, sizeof path);
         fprintf(stderr, "Import date file path: %s\n", path);
+
+        if (conf_ch == 'c') {
+            // cancel all
+            break;
+        }
 
         if (conf_ch != 'a') {
             // prepare header for confirmation dialogue
@@ -99,18 +104,14 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
                 prefresh(cal, *pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
                 pthread_cancel(progress_tid);
             }
-        } else if (conf_ch == 'c') {
-            // cancel all
-            break;
         }
 
         // fprintf(stderr, "Import DTSTART: %s\n", desc);
         // fprintf(stderr, "Import DESCRIPTION: %s\n", desc);
         fprintf(stderr, "* * * * * * * * * * * * * \n");
-
-        free(vevent);
-        free(vevent_date);
-        free(vevent_desc);
     }
+    // free(vevent);
+    // free(vevent_date);
+    // free(vevent_desc);
     free(ics);
 }

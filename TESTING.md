@@ -2,6 +2,22 @@
 
 This file holds notes for testing purposes.
 
+## Valgrind
+
+Use Valgrind on a build with debug symbols to discover memory issues:
+```bash
+mkdir -p tmp-journal
+make debug
+valgrind --leak-check=full ./diary tmp-journal/ 2>log.txt
+```
+
+## Compile with Debug Symbols
+
+To make a build with debug symbols use the `debug` target:
+```bash
+make debug
+```
+
 ## Send stderr to File
 
 Send stderr to a file for debugging:

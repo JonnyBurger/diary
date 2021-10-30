@@ -154,10 +154,6 @@ char* fold(const char* str) {
 
 char* unfold(const char* str) {
     fprintf(stderr, "Before unfolding: %s\n", str);
-    //if (strcmp(str, "")) {
-    //    fputs("Unfold string is empty.\n", stderr);
-    //    return NULL;
-    //}
 
     // work on a copy of the str
     char* strcp = (char *) malloc(strlen(str) * sizeof(char) + 1);
@@ -168,6 +164,12 @@ char* unfold(const char* str) {
     strcpy(strcp, str);
 
     char* res = strtok(strcp, "\n");
+
+    if (res == NULL) {
+        fprintf(stderr, "No more lines in multiline string, stop unfolding.\n");
+        free(strcp);
+        return NULL;
+    }
 
     char* buf = malloc(strlen(res) + 1);
     if (buf == NULL) {
@@ -188,6 +190,11 @@ char* unfold(const char* str) {
     while (res != NULL) {
         res = strtok(NULL, "\n");
 
+        if (res == NULL) {
+            fprintf(stderr, "No more lines in multiline string, stop unfolding.\n");
+            break;
+        }
+
         if (regexec(&re, res, 1, pm, 0) == 0) {
             // Stop unfolding if line does not start with white space/tab:
             // https://datatracker.ietf.org/doc/html/rfc2445#section-4.1
@@ -195,10 +202,9 @@ char* unfold(const char* str) {
         }
 
         newbuf = realloc(buf, strlen(buf) + strlen(res) + 1);
-        if (buf == NULL) {
+        if (newbuf == NULL) {
             perror("realloc failed");
-            free(buf);
-            return NULL;
+            break;
         } else {
             buf = newbuf;
             strcat(buf, res + 1);
@@ -210,7 +216,10 @@ char* unfold(const char* str) {
     return buf;
 }
 
-char* extract_ical_field(const char* ics, char* key, bool multiline) {
+/* Find ical key in string. The value of 'start_pos' is set to the start position
+   of the value (match) after the colon (':').
+*/
+char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multiline) {
     regex_t re;
     regmatch_t pm[1];
     char key_regex[strlen(key) + 1];
@@ -223,7 +232,7 @@ char* extract_ical_field(const char* ics, char* key, bool multiline) {
     }
 
     // work on a copy of the ical xml response
-    char* icscp = (char *) malloc(strlen(ics) * sizeof(char) + 1);
+    char* icscp = (char *) malloc(strlen(ics) + 1 * sizeof(char));
     if (icscp == NULL) {
         perror("malloc failed");
         return NULL;
@@ -231,31 +240,43 @@ char* extract_ical_field(const char* ics, char* key, bool multiline) {
     strcpy(icscp, ics);
 
     // tokenize ical by newlines
+    char* buf = NULL;
     char* res = strtok(icscp, "\n");
-
     while (res != NULL) {
         if (regexec(&re, res, 1, pm, 0) == 0) {
+            // found the key in line 'res'
             res = strstr(res, ":"); // value
             res++; // strip the ":"
 
             fprintf(stderr, "Extracted ical result value: %s\n", res);
             fprintf(stderr, "Extracted ical result size: %li\n", strlen(res));
 
-            if (strlen(res) == 0) {
-                // empty remote description
-                res = NULL;
-            } else if (multiline) {
-                res = unfold(ics + (res - icscp));
+            fprintf(stderr, "Sizeof ics: %li\n", strlen(ics));
+            fprintf(stderr, "Start pos: %li\n", *start_pos);
+            fprintf(stderr, "Res: %s\n", res);
+            *start_pos = res - icscp;
+            fprintf(stderr, "Start pos: %li\n", *start_pos);
+
+            if (strlen(res) != 0) {
+                // non-empty remote value
+                if (multiline) {
+                    buf = unfold(ics + *start_pos);
+                } else {
+                    buf = malloc(strlen(res) + 1);
+                    if (buf == NULL) {
+                        perror("malloc failed");
+                        return NULL;
+                    }
+                    strcpy(buf, res);
+                }
             }
-            break;
         }
-        // key not in this line, advance line
         res = strtok(NULL, "\n");
     }
-    fprintf(stderr, "Sizeof ics: %li\n", strlen(ics));
 
+    regfree(&re);
     free(icscp);
-    return res;
+    return buf;
 }
 
 // Return expanded file path
@@ -319,7 +340,65 @@ void fpath(const char* dir, size_t dir_size, const struct tm* date, char** rpath
     strcat(*rpath, dstr);
 }
 
+bool go_to(WINDOW* calendar, WINDOW* aside, time_t date, int* cur_pad_pos, struct tm* curs_date, struct tm* cal_start, struct tm* cal_end) {
+    if (date < mktime(cal_start) || date > mktime(cal_end)) {
+        fprintf(stderr, "Invalid cursor move, return from go_to\n");
+        return false;
+    }
+
+    int diff_seconds = date - mktime(cal_start);
+    int diff_days = diff_seconds / 60 / 60 / 24;
+    int diff_weeks = diff_days / 7;
+    int diff_wdays = diff_days % 7;
+
+    localtime_r(&date, curs_date);
+
+    int cy, cx;
+    getyx(calendar, cy, cx);
+
+    // remove the STANDOUT attribute from the day we are leaving
+    chtype current_attrs = mvwinch(calendar, cy, cx) & A_ATTRIBUTES;
+    // leave every attr as is, but turn off STANDOUT
+    current_attrs &= ~A_STANDOUT;
+    mvwchgat(calendar, cy, cx, 2, current_attrs, 0, NULL);
+
+    // add the STANDOUT attribute to the day we are entering
+    chtype new_attrs =  mvwinch(calendar, diff_weeks, diff_wdays * 3) & A_ATTRIBUTES;
+    new_attrs |= A_STANDOUT;
+    mvwchgat(calendar, diff_weeks, diff_wdays * 3, 2, new_attrs, 0, NULL);
+
+    if (diff_weeks < *cur_pad_pos)
+        *cur_pad_pos = diff_weeks;
+    if (diff_weeks > *cur_pad_pos + LINES - 2)
+        *cur_pad_pos = diff_weeks - LINES + 2;
+    prefresh(aside, *cur_pad_pos, 0, 1, 0, LINES - 1, ASIDE_WIDTH);
+    prefresh(calendar, *cur_pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
+
+    return true;
+}
+
+
+void* show_progress(void* vargp){
+    WINDOW* header = (WINDOW*) vargp;
+    mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 11, "   syncing ");
+    for(;;) {
+        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "|");
+        wrefresh(header);
+        usleep(200000);
+        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "/");
+        wrefresh(header);
+        usleep(200000);
+        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "-");
+        wrefresh(header);
+        usleep(200000);
+        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "\\");
+        wrefresh(header);
+        usleep(200000);
+    }
+}
+
 config CONFIG = {
+    .dir = NULL,
     .range = 1,
     .weekday = 1,
     .fmt = "%Y-%m-%d",

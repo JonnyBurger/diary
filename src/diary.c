@@ -77,40 +77,6 @@ void draw_calendar(WINDOW* number_pad, WINDOW* month_pad, const char* diary_dir,
     }
 }
 
-bool go_to(WINDOW* calendar, WINDOW* aside, time_t date, int* cur_pad_pos) {
-    if (date < mktime(&cal_start) || date > mktime(&cal_end))
-        return false;
-
-    int diff_seconds = date - mktime(&cal_start);
-    int diff_days = diff_seconds / 60 / 60 / 24;
-    int diff_weeks = diff_days / 7;
-    int diff_wdays = diff_days % 7;
-
-    localtime_r(&date, &curs_date);
-
-    getyx(calendar, cy, cx);
-
-    // remove the STANDOUT attribute from the day we are leaving
-    chtype current_attrs = mvwinch(calendar, cy, cx) & A_ATTRIBUTES;
-    // leave every attr as is, but turn off STANDOUT
-    current_attrs &= ~A_STANDOUT;
-    mvwchgat(calendar, cy, cx, 2, current_attrs, 0, NULL);
-
-    // add the STANDOUT attribute to the day we are entering
-    chtype new_attrs =  mvwinch(calendar, diff_weeks, diff_wdays * 3) & A_ATTRIBUTES;
-    new_attrs |= A_STANDOUT;
-    mvwchgat(calendar, diff_weeks, diff_wdays * 3, 2, new_attrs, 0, NULL);
-
-    if (diff_weeks < *cur_pad_pos)
-        *cur_pad_pos = diff_weeks;
-    if (diff_weeks > *cur_pad_pos + LINES - 2)
-        *cur_pad_pos = diff_weeks - LINES + 2;
-    prefresh(aside, *cur_pad_pos, 0, 1, 0, LINES - 1, ASIDE_WIDTH);
-    prefresh(calendar, *cur_pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
-
-    return true;
-}
-
 /* Update window 'win' with diary entry from date 'date' */
 void display_entry(const char* dir, size_t dir_size, const struct tm* date, WINDOW* win, int width) {
     char path[100];
@@ -405,6 +371,7 @@ int main(int argc, char** argv) {
                     return 0;
                     break;
                 case 'd':
+                    free(CONFIG.dir);
                     // set diary directory from option character
                     CONFIG.dir = (char *) calloc(strlen(optarg) + 1, sizeof(char));
                     strcpy(CONFIG.dir, optarg);
@@ -434,6 +401,7 @@ int main(int argc, char** argv) {
         }
 
         if (optind < argc) {
+            free(CONFIG.dir);
             // set diary directory from first non-option argv-element,
             // required for backwarad compatibility with diary <= 0.4
             CONFIG.dir = (char *) calloc(strlen(argv[optind]) + 1, sizeof(char));
@@ -474,12 +442,14 @@ int main(int argc, char** argv) {
     int ch, conf_ch;
     int pad_pos = 0;
     int syear = 0, smonth = 0, sday = 0;
+    char ics_input_filepath[256];
+    char* expanded_ics_input_filepath;
     struct tm new_date;
     int prev_width = COLS - ASIDE_WIDTH - CAL_WIDTH;
     int prev_height = LINES - 1;
     size_t diary_dir_size = strlen(CONFIG.dir);
 
-    bool mv_valid = go_to(cal, aside, raw_time, &pad_pos);
+    bool mv_valid = go_to(cal, aside, raw_time, &pad_pos, &curs_date, &cal_start, &cal_end);
     // mark current day
     atrs = winch(cal) & A_ATTRIBUTES;
     wchgat(cal, 2, atrs | A_UNDERLINE, 0, NULL);
@@ -509,32 +479,32 @@ int main(int argc, char** argv) {
             case 'j':
             case KEY_DOWN:
                 new_date.tm_mday += 7;
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
             case 'k':
             case KEY_UP:
                 new_date.tm_mday -= 7;
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
             case 'l':
             case KEY_RIGHT:
                 new_date.tm_mday++;
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
             case 'h':
             case KEY_LEFT:
                 new_date.tm_mday--;
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
 
             // jump to top/bottom of page
             case 'g':
                 new_date = find_closest_entry(cal_start, false, CONFIG.dir, diary_dir_size);
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
             case 'G':
                 new_date = find_closest_entry(cal_end, true, CONFIG.dir, diary_dir_size);
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
 
             // jump backward/forward by a month
@@ -542,12 +512,12 @@ int main(int argc, char** argv) {
                 if (new_date.tm_mday == 1)
                     new_date.tm_mon--;
                 new_date.tm_mday = 1;
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
             case 'J':
                 new_date.tm_mon++;
                 new_date.tm_mday = 1;
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
 
             // find specific date
@@ -561,14 +531,14 @@ int main(int argc, char** argv) {
                     // struct tm.tm_mon in range [0, 11]
                     new_date.tm_mon = smonth - 1;
                     new_date.tm_mday = sday;
-                    mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                    mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 }
                 curs_set(0);
                 break;
             // today shortcut
             case 't':
                 new_date = today;
-                mv_valid = go_to(cal, aside, raw_time, &pad_pos);
+                mv_valid = go_to(cal, aside, raw_time, &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
             // delete entry
             case 'd':
@@ -635,12 +605,12 @@ int main(int argc, char** argv) {
             // Move to the previous diary entry
             case 'N':
                 new_date = find_closest_entry(new_date, true, CONFIG.dir, diary_dir_size);
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
             // Move to the next diary entry
             case 'n':
                 new_date = find_closest_entry(new_date, false, CONFIG.dir, diary_dir_size);
-                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos);
+                mv_valid = go_to(cal, aside, mktime(&new_date), &pad_pos, &curs_date, &cal_start, &cal_end);
                 break;
             // Sync entry with CalDAV server.
             // Show confirmation dialogue before overwriting local files
@@ -666,6 +636,21 @@ int main(int argc, char** argv) {
                     it.tm_mday++;
                 }
                 break;
+            // import from ics file
+            case 'i':
+                wclear(header);
+                curs_set(2);
+                mvwprintw(header, 0, 0, "Import from file: ");
+                if (wscanw(header, "%s", &ics_input_filepath) == 1) {
+                    // fprintf(stderr, "ICS input file: %s\n", ics_input_filepath);
+                    expanded_ics_input_filepath = expand_path(ics_input_filepath);
+                    ics_import(expanded_ics_input_filepath, header, cal, aside, &pad_pos, &curs_date, &cal_start, &cal_end);
+                    free(expanded_ics_input_filepath);
+                }
+
+                curs_set(0);
+                echo();
+                break;
         }
 
         if (mv_valid) {
@@ -682,6 +667,7 @@ int main(int argc, char** argv) {
     } while (ch != 'q');
 
     free(config_file_path);
+    free(CONFIG.dir);
     endwin();
     system("clear");
     return 0;

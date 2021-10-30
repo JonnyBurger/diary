@@ -1,6 +1,6 @@
 TARGET = diary
 SRCDIR = src/
-_SRC = utils.c caldav.c diary.c
+_SRC = import.c utils.c caldav.c diary.c
 SRC = $(addprefix $(SRCDIR), $(_SRC))
 PREFIX ?= /usr/local
 BINDIR ?= $(DESTDIR)$(PREFIX)/bin
@@ -31,6 +31,9 @@ default: $(TARGET)
 
 $(TARGET): $(SRC)
 	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) $(LIBS)
+
+debug: $(SRC)
+	$(CC) $(SRC) -o $(TARGET) $(CFLAGS) -g $(LIBS)
 
 clean:
 	rm -f $(TARGET)

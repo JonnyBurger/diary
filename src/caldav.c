@@ -587,25 +587,6 @@ void put_event(struct tm* date, const char* dir, size_t dir_size, char* calendar
     }
 }
 
-void* show_progress(void* vargp){
-    WINDOW* header = (WINDOW*) vargp;
-    mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 11, "   syncing ");
-    for(;;) {
-        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "|");
-        wrefresh(header);
-        usleep(200000);
-        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "/");
-        wrefresh(header);
-        usleep(200000);
-        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "-");
-        wrefresh(header);
-        usleep(200000);
-        mvwprintw(header, 0, COLS - CAL_WIDTH - ASIDE_WIDTH - 10, "\\");
-        wrefresh(header);
-        usleep(200000);
-    }
-}
-
 /*
 * Sync with CalDAV server.
 * Returns the answer char of the confirmation dialogue
@@ -664,7 +645,7 @@ int caldav_sync(struct tm* date,
 
     char* tokenfile_path = expand_path(CONFIG.google_tokenfile);
     if (user_principal == NULL) {
-        fprintf(stderr, "Unable to fetch principal due to invalid tokenfile. Removing tokenfile '%s'.\n", CONFIG.google_tokenfile);
+        fprintf(stderr, "Unable to fetch principal. Offline or invalid tokenfile. Removing tokenfile '%s'.\n", CONFIG.google_tokenfile);
 
         wclear(header);
         mvwprintw(header, 0, 0, "Invalid Google OAuth2 credentials, removing tokenfile at '%s'. Please retry.", CONFIG.google_tokenfile);
@@ -753,7 +734,9 @@ int caldav_sync(struct tm* date,
     }
     struct tm* localfile_time = gmtime(&attr.st_mtime);
     fprintf(stderr, "Local dst: %i\n", localfile_time->tm_isdst);
-    //local_time->tm_isdst = -1;
+    // set to negative value, so mktime uses timezone information and system databases
+    // to attempt to determine whether DST is in effect at the specified time
+    localfile_time->tm_isdst = -1;
     time_t localfile_date = mktime(localfile_time);
     fprintf(stderr, "Local dst: %i\n", localfile_time->tm_isdst);
     fprintf(stderr, "Local file last modified time: %s\n", ctime(&localfile_date));
@@ -761,21 +744,24 @@ int caldav_sync(struct tm* date,
 
     struct tm remote_datetime;
     time_t remote_date;
+    long search_pos = 0;
 
     // check remote LAST-MODIFIED:20210521T212441Z of remote event
-    char* remote_last_mod = extract_ical_field(event, "LAST-MODIFIED", false);
-    char* remote_uid = extract_ical_field(event, "UID", false);
-    fprintf(stderr, "Remote last modified: %s\n", remote_last_mod);
-    fprintf(stderr, "Remote UID: %s\n", remote_uid);
-    if (remote_last_mod == NULL) {
+    char* remote_last_mod = extract_ical_field(event, "LAST-MODIFIED", &search_pos, false);
+    char* remote_uid = extract_ical_field(event, "UID", &search_pos, false);
+
+    if (remote_last_mod == NULL || remote_uid == NULL) {
         remote_file_exists = false;
     } else {
+        fprintf(stderr, "Remote last modified: %s\n", remote_last_mod);
+        fprintf(stderr, "Remote UID: %s\n", remote_uid);
         strptime(remote_last_mod, "%Y%m%dT%H%M%SZ", &remote_datetime);
         //remote_datetime.tm_isdst = -1;
         fprintf(stderr, "Remote dst: %i\n", remote_datetime.tm_isdst);
         remote_date = mktime(&remote_datetime);
         fprintf(stderr, "Remote dst: %i\n", remote_datetime.tm_isdst);
         fprintf(stderr, "Remote last modified: %s\n", ctime(&remote_date));
+        free(remote_last_mod);
     }
 
     if (! (local_file_exists || remote_file_exists)) {
@@ -788,7 +774,7 @@ int caldav_sync(struct tm* date,
     double timediff = difftime(localfile_date, remote_date);
     fprintf(stderr, "Time diff between local and remote mod time:%e\n", timediff);
 
-    if ((timediff > 0 && local_file_exists) || (local_file_exists && !remote_file_exists)) {
+    if (local_file_exists && (timediff > 0 || !remote_file_exists)) {
         // local time > remote time
         // if local file mod time more recent than LAST-MODIFIED
 
@@ -811,8 +797,8 @@ int caldav_sync(struct tm* date,
     char* rmt_desc;
     char dstr[16];
     int conf_ch;
-    if ((timediff < 0 && remote_file_exists) || (!local_file_exists && remote_file_exists)) {
-        rmt_desc = extract_ical_field(event, "DESCRIPTION", true);
+    if (remote_file_exists && (timediff < 0 || !local_file_exists)) {
+        rmt_desc = extract_ical_field(event, "DESCRIPTION", &search_pos, true);
         fprintf(stderr, "Remote event description:%s\n", rmt_desc);
 
         if (rmt_desc == NULL) {
@@ -832,7 +818,7 @@ int caldav_sync(struct tm* date,
 
         // ask for confirmation
         strftime(dstr, sizeof dstr, CONFIG.fmt, date);
-        mvwprintw(header, 0, 0, "Remote event is more recent. Sync entry '%s' and overwrite local file? [(Y)es/(a)all/(n)o/(c)ancel] ", dstr);
+        mvwprintw(header, 0, 0, "Remote event is more recent. Sync entry '%s' and overwrite local file? [(Y)es/(a)ll/(n)o/(c)ancel] ", dstr);
         char* i;
         bool conf = false;
         while (!conf) {

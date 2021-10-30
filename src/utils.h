@@ -3,6 +3,7 @@
 
 #include <regex.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
@@ -26,10 +27,12 @@ void update_date(WINDOW* header, struct tm* curs_date);
 char* extract_json_value(const char* json, char* key, bool quoted);
 char* fold(const char* str);
 char* unfold(const char* str);
-char* extract_ical_field(const char* ical, char* key, bool multline);
+char* extract_ical_field(const char* ical, char* key, long* start_pos, bool multline);
 char* expand_path(const char* str);
 char* strrstr(char *haystack, char *needle);
 void fpath(const char* dir, size_t dir_size, const struct tm* date, char** rpath, size_t rpath_size);
+bool go_to(WINDOW* calendar, WINDOW* aside, time_t date, int* cur_pad_pos, struct tm* curs_date, struct tm* cal_start, struct tm* cal_end);
+void* show_progress(void* vargp);
 
 typedef struct
 {

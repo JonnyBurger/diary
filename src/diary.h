@@ -17,6 +17,7 @@
 #include <locale.h>
 #include <langinfo.h>
 #include "utils.h"
+#include "import.h"
 #include "caldav.h"
 
 #define XDG_CONFIG_HOME_FALLBACK "~/.config"
@@ -29,7 +30,6 @@ void setup_cal_timeframe();
 void draw_wdays(WINDOW* head);
 void draw_calendar(WINDOW* number_pad, WINDOW* month_pad, const char* diary_dir, size_t diary_dir_size);
 
-bool go_to(WINDOW* calendar, WINDOW* aside, time_t date, int* cur_pad_pos);
 void display_entry(const char* dir, size_t dir_size, const struct tm* date, WINDOW* win, int width);
 void edit_cmd(const char* dir, size_t dir_size, const struct tm* date, char** rcmd, size_t rcmd_size);
 

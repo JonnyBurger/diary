@@ -23,7 +23,7 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
 
     int conf_ch = 0;
     char dstr[16];
-    struct tm date;
+    struct tm date = {};
 
     long search_pos = 0;
     char* vevent;
@@ -45,7 +45,7 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
         // fprintf(stderr, "VEVENT DESCRIPTION: \n\n%s\n\n", vevent_desc);
 
         // parse date
-        strptime(vevent_date, "%Y%m%dT%H%M%SZ", &date);
+        strptime(vevent_date, "%Y%m%d", &date);
         strftime(dstr, sizeof dstr, CONFIG.fmt, &date);
 
         // get path of entry
@@ -96,12 +96,13 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
                 }
                 fclose(cursordate_file);
 
-                // add new entry highlight
-                go_to(cal, aside, mktime(&date), pad_pos, curs_date, cal_start, cal_end);
-                // update_date(header, curs_date);
-                chtype atrs = winch(cal) & A_ATTRIBUTES;
-                wchgat(cal, 2, atrs | A_BOLD, 0, NULL);
-                prefresh(cal, *pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
+                bool mv_valid = go_to(cal, aside, mktime(&date), pad_pos, curs_date, cal_start, cal_end);
+                if (mv_valid) {
+                    // add new entry highlight
+                    chtype atrs = winch(cal) & A_ATTRIBUTES;
+                    wchgat(cal, 2, atrs | A_BOLD, 0, NULL);
+                    prefresh(cal, *pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
+                }
                 pthread_cancel(progress_tid);
             }
         }
@@ -110,8 +111,8 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
         // fprintf(stderr, "Import DESCRIPTION: %s\n", desc);
         fprintf(stderr, "* * * * * * * * * * * * * \n");
     }
-    // free(vevent);
-    // free(vevent_date);
-    // free(vevent_desc);
+    free(vevent);
+    free(vevent_date);
+    free(vevent_desc);
     free(ics);
 }

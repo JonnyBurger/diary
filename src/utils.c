@@ -232,7 +232,7 @@ char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multi
     }
 
     // work on a copy of the ical xml response
-    char* icscp = (char *) malloc(strlen(ics) * sizeof(char) + 1);
+    char* icscp = (char *) malloc(strlen(ics) + 1 * sizeof(char));
     if (icscp == NULL) {
         perror("malloc failed");
         return NULL;
@@ -240,10 +240,11 @@ char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multi
     strcpy(icscp, ics);
 
     // tokenize ical by newlines
+    char* buf = NULL;
     char* res = strtok(icscp, "\n");
-
     while (res != NULL) {
         if (regexec(&re, res, 1, pm, 0) == 0) {
+            // found the key in line 'res'
             res = strstr(res, ":"); // value
             res++; // strip the ":"
 
@@ -255,33 +256,26 @@ char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multi
             fprintf(stderr, "Res: %s\n", res);
             *start_pos = res - icscp;
             fprintf(stderr, "Start pos: %li\n", *start_pos);
-            break;
-        }
-        // key not in this line, advance line
-        res = strtok(NULL, "\n");
-    }
 
-    char* buf = NULL;
-
-    if (res != NULL) {
-        if (strlen(res) == 0) {
-            // empty remote value
-            buf = NULL;
-        } else if (multiline) {
-            buf = unfold(ics + *start_pos);
-        } else {
-            buf = malloc(strlen(res) + 1);
-            if (buf == NULL) {
-                perror("malloc failed");
-                return NULL;
+            if (strlen(res) != 0) {
+                // non-empty remote value
+                if (multiline) {
+                    buf = unfold(ics + *start_pos);
+                } else {
+                    buf = malloc(strlen(res) + 1);
+                    if (buf == NULL) {
+                        perror("malloc failed");
+                        return NULL;
+                    }
+                    strcpy(buf, res);
+                }
             }
-            strcpy(buf, res);
         }
+        res = strtok(NULL, "\n");
     }
 
     regfree(&re);
     free(icscp);
-
     return buf;
 }
 
@@ -347,8 +341,10 @@ void fpath(const char* dir, size_t dir_size, const struct tm* date, char** rpath
 }
 
 bool go_to(WINDOW* calendar, WINDOW* aside, time_t date, int* cur_pad_pos, struct tm* curs_date, struct tm* cal_start, struct tm* cal_end) {
-    if (date < mktime(cal_start) || date > mktime(cal_end))
+    if (date < mktime(cal_start) || date > mktime(cal_end)) {
+        fprintf(stderr, "Invalid cursor move, return from go_to\n");
         return false;
+    }
 
     int diff_seconds = date - mktime(cal_start);
     int diff_days = diff_seconds / 60 / 60 / 24;
@@ -402,6 +398,7 @@ void* show_progress(void* vargp){
 }
 
 config CONFIG = {
+    .dir = NULL,
     .range = 1,
     .weekday = 1,
     .fmt = "%Y-%m-%d",

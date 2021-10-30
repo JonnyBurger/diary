@@ -371,6 +371,7 @@ int main(int argc, char** argv) {
                     return 0;
                     break;
                 case 'd':
+                    free(CONFIG.dir);
                     // set diary directory from option character
                     CONFIG.dir = (char *) calloc(strlen(optarg) + 1, sizeof(char));
                     strcpy(CONFIG.dir, optarg);
@@ -400,6 +401,7 @@ int main(int argc, char** argv) {
         }
 
         if (optind < argc) {
+            free(CONFIG.dir);
             // set diary directory from first non-option argv-element,
             // required for backwarad compatibility with diary <= 0.4
             CONFIG.dir = (char *) calloc(strlen(argv[optind]) + 1, sizeof(char));
@@ -665,6 +667,7 @@ int main(int argc, char** argv) {
     } while (ch != 'q');
 
     free(config_file_path);
+    free(CONFIG.dir);
     endwin();
     system("clear");
     return 0;

@@ -32,6 +32,7 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
 
     // find all VEVENTs and write to files
     char *i = ics;
+    char* j;
     while (i < ics + ics_bytes) {
         vevent = extract_ical_field(i, "BEGIN:VEVENT", &search_pos, false);
         vevent_date = extract_ical_field(i, "DTSTART", &search_pos, false);
@@ -78,7 +79,7 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
             if (cursordate_file == NULL) {
                 perror("Failed to open import date file");
             } else {
-                for (char* j = vevent_desc; *j != '\0'; j++) {
+                for (j = vevent_desc; *j != '\0'; j++) {
                     if (vevent_desc[j-vevent_desc] == 0x5C) { // backslash
                         switch (*(j+1)) {
                             case 'n':

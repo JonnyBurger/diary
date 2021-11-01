@@ -1,8 +1,8 @@
 workflow:
   steps:
     - rebuild_package:
-        source_project: home:in0rdr
-        source_package: diary-nightly
+        project: home:in0rdr
+        package: diary-nightly
   filters:
     event: push
     branches:

@@ -270,6 +270,7 @@ char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multi
                     strcpy(buf, res);
                 }
             }
+            break;
         }
         res = strtok(NULL, "\n");
     }

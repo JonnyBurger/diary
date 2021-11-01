@@ -12,7 +12,7 @@ The documentation for this kind of "workflow" can be found in the [GitHub reposi
 
 [`.github/workflows/c.yml`](../.github/workflows/c.yml) implements a GitHub action to run the simple series of build steps (`make && make install`) for new commits and pull requests on the `master` branch.
 
-[`.github/c/make-install`](.../.github/c/make-install) is a re-usable action (dependency).
+[`.github/c/make-install/action.yml`](../.github/c/make-install/action.yml) is a re-usable action (dependency).
 
 ## GitHub Action to Render Man Page
 

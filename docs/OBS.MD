@@ -4,22 +4,39 @@ The OBS project [`home:in0rdr`](https://build.opensuse.org/project/show/home:in0
 * `diary`: Latest stable release built from tar.gz statically placed in the source
 * `diary-nightly`: Latest unstable build, re-built dynamically from the code on the GitHub master branch (see [./CI.MD](./CI.MD) for a description of the GitHub Actions)
 
+> ℹ️ `diary-nightly` is not branched from `diary`, it has a completely separate build config.
+
 Additionally, these packages are being used as dependency for `diary-nightly`, to download the latest diary source code from the GitHub master branch:
 * `obs-service-recompress`
 * `obs-service-set_version`
 * `obs-service-tar_scm`
 * `zstd`
 
+The remaining sections below describe the purpose of the source services and how they are used for the `diary-nightly` build (dependencies).
+
+## OBS Project Configuration
+
+```
+# Disable obs_scm_testsuite for obs-service-set_version:
+# https://github.com/openSUSE/obs-service-set_version/issues/64
+Macros:
+%_without_obs_scm_testsuite 1
+:Macros
+
+# Fix "have choice for libzstd.so.1()(64bit) needed by rpm-build: libzstd libzstd1"
+# https://en.opensuse.org/openSUSE:Build_Service_prjconf#Prefer
+Prefer: libzstd
+```
+
 ## OBS Source Services (`obs-service-`) Documentation
 
-The documentation on how to use source services is sparse and scattered: 
+The documentation on how to use source services is sparse and scattered:
 
 * https://openbuildservice.org/help/manuals/obs-user-guide/cha.obs.source_service.html
 * https://github.com/openSUSE/obs-service-tar_scm/issues/238
 * https://github.com/openSUSE/obs-service-tar_scm/issues/223
 * https://build.opensuse.org/package/view_file/OBS:Server:Unstable/obs-service-tar_scm/_service?expand=1
 
-The remaining sections below describe the purpose of the source services and how they are used for the `diary-nightly` build (dependencies).
 
 ## `obs-service-recompress`
 
@@ -50,3 +67,30 @@ This service is used in combination with the service [`tar_scm`](https://github.
 
 https://github.com/openSUSE/obs-service-set_version
 
+## `obs-service-tar_scm`
+
+Fix build for CentOS 8 by applying this patch:
+https://github.com/openSUSE/obs-service-tar_scm/issues/374
+
+Manual download of latest release:
+https://github.com/openSUSE/obs-service-tar_scm/tags
+
+* Use a simple filename and version, such as `obs-service-tar_scm-0.10.29.tar.gz `.
+* Adjust the version numbers in the build files.
+
+Applying the latest version fixes the following issue:
+```
+[    2s] Running build time source services...
+[    2s] Preparing sources...
+[    2s] ==> WARNING: Skipping verification of source file PGP signatures.
+[    2s]     obs-service-tar_scm-0.10.28.1632141620.a8837d3.tar.gz ... Skipped
+[    2s] bsdtar: Failed to set default locale
+[    2s] bsdtar: Pathname can't be converted from UTF-8 to current locale.
+[    2s] bsdtar: Error exit delayed from previous errors.
+[    2s] ==> ERROR: Failed to extract obs-service-tar_scm-0.10.28.1632141620.a8837d3.tar.gz
+[    2s]     Aborting...
+[    2s] failed to prepare sources
+```
+
+The following patch might be related (needs to be applied OBS server-side, nothing left to do):
+https://github.com/openSUSE/obs-build/pull/696

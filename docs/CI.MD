@@ -1,8 +1,7 @@
 # Documentation of CI Jobs
 
 ## OpenSuse Build Service Nightly Builds from Master
-`push` events on the `master` branch trigger a rebuild of the [`diary-nightly`](https://build.opensuse.org/package/show/home:in0rdr/diary-nightly) package in the OpenSuse Build Service.
-
+`push` events on the `master` branch trigger a rebuild of the [`diary-nightly`](https://build.opensuse.org/package/show/home:in0rdr/diary-nightly) package in the OpenSuse Build Service (see [./OBS.MD](./OBS.MD) for a description of the OBS builds).
 
 These jobs are called "workflows" in the OpenSuse Build Service and they are stored at [`.obs/workflows.yml`](../.obs/workflows.yml).
 

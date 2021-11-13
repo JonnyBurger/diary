@@ -107,8 +107,28 @@ The following patch might be related (needs to be applied OBS server-side, nothi
 https://github.com/openSUSE/obs-build/pull/696
 
 ## `zstd`
+> ❓ is the `zstd` package really required for the build? `obs-service-recompress` uses `tar.gz` compression.
 
-`obs-service-recompress` requires `zstd`.
+> - [ ] check download page: https://software.opensuse.org/download.html?project=home%3Ain0rdr&package=diary-nightly
+
+If `diary-nightly` for ArchLinux is built with `tar.gz` compression, the build will not be shown on the [download page](https://software.opensuse.org//download.html?project=home%3Ain0rdr&package=diary-nightly) because the download button for ArchLinux is missing, see also:
+* https://github.com/in0rdr/diary/issues/64
+* https://github.com/openSUSE/software-o-o/issues/844
+* https://github.com/openSUSE/open-build-service/pull/10570
+* https://archlinux.org/news/now-using-zstandard-instead-of-xz-for-package-compression
+
+Therefore, build the ArchLinux package with the `.pkg.tar.zst` extension/compression:
+
+```
+# ./diary-nightly/PKGBUILD
+PKGEXT='.pkg.tar.zst'
+```
+
+If the ZST compression (new defacto standard since [2020-01-04](https://archlinux.org/news/now-using-zstandard-instead-of-xz-for-package-compression)) does not work, use the xz compression as an alternative as described in [openSUSE/software-o-o/#844](https://github.com/openSUSE/software-o-o/issues/844):
+
+```
+PKGEXT='.pkg.tar.xz'
+```
 
 Patch `zstd.spec`, such that RHEL build require `glibc-static` and openSUSE builds require `glibc-devel-static`:
 ```diff

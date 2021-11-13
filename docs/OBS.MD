@@ -69,8 +69,19 @@ https://github.com/openSUSE/obs-service-set_version
 
 ## `obs-service-tar_scm`
 
-Fix build for CentOS 8 by applying this patch:
-https://github.com/openSUSE/obs-service-tar_scm/issues/374
+Fix build for CentOS 8 by applying this patch in `obs-service-tar_scm.spec`:
+* https://github.com/openSUSE/obs-service-tar_scm/issues/374
+* https://github.com/olegantonyan/obs-service-tar_scm/commit/6a454aa71395ca03a737d795551ba027a5f8a9e3
+
+```diff
+  %if %{with python3}
++
++ %if 0%{?centos_version} >= 800
++ # ignore python3 dependency (nothing provides python3 error)
++ %else
+  BuildRequires:  %{use_python}%{_pkg_base}
++ %endif
+```
 
 Manual download of latest release:
 https://github.com/openSUSE/obs-service-tar_scm/tags

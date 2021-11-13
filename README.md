@@ -175,7 +175,7 @@ The export functionality is not implemented yet, see [issues/78](https://github.
 ## CalDAV Sync (alpha)
 > ⚠️  Alpha feature: Available only in `diary-nightly` (see [Installation Instructions](#Install)). Don't use this with "production" data.
 
-The journal files can be synced via CalDAV. Currently, only the Google Calendar is supported as remote provider. Please open an [issue](https://github.com/in0rdr/diary/issues) to implement support for additional remote calendar servers.
+The journal files can be synced via CalDAV by pressing `s`. Currently, only the Google Calendar is supported as remote provider. Please open an [issue](https://github.com/in0rdr/diary/issues) to implement support for additional remote calendar servers.
 
 
 The calender for synchronization can be defined with the [configuration](#Configuration-File) key `google_calendar`:

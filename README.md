@@ -71,7 +71,7 @@ To use the repository on Arch Linux, use `downloadcontent.opensuse.org` instead 
 Server = https://downloadcontent.opensuse.org/repositories/home:/in0rdr/Arch/$arch
 ```
 
-## Build
+## Build from Source
 [![Build Status](https://github.com/in0rdr/diary/actions/workflows/c.yml/badge.svg)](https://github.com/in0rdr/diary/actions/workflows/c.yml)
 
 1. Define [OAuth2 application credentials](https://developers.google.com/identity/protocols/oauth2) if CalDAV sync should be effective:
@@ -96,6 +96,12 @@ Note: for *BSD users run gmake.
    By default this will copy the binary to /usr/local/bin. To use a different
    path prefix, type `sudo make PREFIX=/usr install` to use /usr/bin for example.
    You can uninstall diary with `sudo make uninstall`.
+
+## OBS Build Documentation
+[./docs/OBS.MD](./docs/OBS.MD)
+
+## GitHub Action CI Documentation
+[./docs/CI.MD](./docs/CI.MD)
 
 ## Configuration File
 

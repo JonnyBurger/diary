@@ -94,3 +94,17 @@ Applying the latest version fixes the following issue:
 
 The following patch might be related (needs to be applied OBS server-side, nothing left to do):
 https://github.com/openSUSE/obs-build/pull/696
+
+## `zstd`
+
+`obs-service-recompress` requires `zstd`.
+
+Patch `zstd.spec`, such that RHEL build require `glibc-static` and openSUSE builds require `glibc-devel-static`:
+```diff
+- BuildRequires:  (glibc-static or glibc-devel-static)
++ %if 0%{?rhel} || 0%{?fedora}
++ BuildRequires:  glibc-static
++ %else
++ BuildRequires:  glibc-devel-static
++ %endif
+```

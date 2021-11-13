@@ -164,7 +164,17 @@ $ rm ${XDG_CONFIG_HOME:-~/.config}/diary/diary.cfg
 $ diary
 ```
 
-## CalDAV Sync
+## Import/Export (alpha)
+
+The import functionalty can be triggered by pressing `i`.
+
+> ⚠️  Alpha feature: Available only in `diary-nightly` (see [Installation Instructions](#Install)). Don't use this with "production" data.
+
+The export functionalty is not implemented yet, see [issues/78](https://github.com/in0rdr/diary/issues/78).
+
+## CalDAV Sync (alpha)
+> ⚠️  Alpha feature: Available only in `diary-nightly` (see [Installation Instructions](#Install)). Don't use this with "production" data.
+
 The journal files can be synced via CalDAV. Currently, only the Google Calendar is supported as remote provider. Please open an [issue](https://github.com/in0rdr/diary/issues) to implement support for additional remote calendar servers.
 
 

@@ -166,11 +166,11 @@ $ diary
 
 ## Import/Export (alpha)
 
-The import functionalty can be triggered by pressing `i`.
+The import functionality can be triggered by pressing `i`.
 
 > ⚠️  Alpha feature: Available only in `diary-nightly` (see [Installation Instructions](#Install)). Don't use this with "production" data.
 
-The export functionalty is not implemented yet, see [issues/78](https://github.com/in0rdr/diary/issues/78).
+The export functionality is not implemented yet, see [issues/78](https://github.com/in0rdr/diary/issues/78).
 
 ## CalDAV Sync (alpha)
 > ⚠️  Alpha feature: Available only in `diary-nightly` (see [Installation Instructions](#Install)). Don't use this with "production" data.

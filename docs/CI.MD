@@ -5,7 +5,7 @@
 
 These jobs are called "workflows" in the OpenSuse Build Service and they are stored at [`.obs/workflows.yml`](../.obs/workflows.yml).
 
-The documentation for this kind of "workflow" can be found in the [GitHub repository of the Open Build Service](https://github.com/openSUSE/open-build-service/wiki/Better-SCM-CI-Integration) and in a [series of blog posts on "SCM integration".](https://openbuildservice.org/blog).
+The documentation for this kind of "workflow" can be found in the [GitHub repository of the Open Build Service](https://github.com/openSUSE/open-build-service/wiki/Better-SCM-CI-Integration) and in a [series of blog posts on "SCM integration"](https://openbuildservice.org/blog).
 
 ## GitHub Action to Verify Build
 

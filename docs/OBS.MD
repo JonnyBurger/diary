@@ -37,36 +37,6 @@ The documentation on how to use source services is sparse and scattered:
 
 The purpose of the source services and how they are used for the `diary-nightly` build (dependencies) is documented below.
 
-### `openSUSE:Tools/obs-service-recompress`
-
-https://github.com/openSUSE/obs-service-recompress
-
-Branched package from [`openSUSE:Tools/obs-service-recompress`](https://build.opensuse.org/package/show/openSUSE:Tools/obs-service-recompress).
-
-If this package is not made available in the local project `home:in0rdr`, following error message will occur:
-```
-nothing provides obs-service-recompress
-```
-
-No further modifications needed, but needs to be available for the `diary-nightly` for compression services:
-```bash
-# home:in0rdr/diary-nightly/_service
-<services>
-  <service mode="buildtime" name="recompress">
-    <param name="file">*.tar</param>
-    <param name="compression">gz</param>
-  </service>
-...
-</services>
-```
-
-This service is used in combination with the service [`tar_scm`](https://github.com/openSUSE/obs-service-tar_scm).
-
-### `openSUSE:Tools/obs-service-set_version`
-
-This service sets the version in the RPM spec or Debian changelog according to the latest source files downloaded from GitHub:
-https://github.com/openSUSE/obs-service-set_version
-
 ### `openSUSE:Tools/obs-service-tar_scm`
 
 Fix build for CentOS 8 by applying this patch in `obs-service-tar_scm.spec`:
@@ -105,6 +75,36 @@ Applying the latest version fixes the following issue:
 
 The following patch might be related (needs to be applied OBS server-side, nothing left to do):
 https://github.com/openSUSE/obs-build/pull/696
+
+### `openSUSE:Tools/obs-service-recompress`
+
+https://github.com/openSUSE/obs-service-recompress
+
+Branched package from [`openSUSE:Tools/obs-service-recompress`](https://build.opensuse.org/package/show/openSUSE:Tools/obs-service-recompress).
+
+If this package is not made available in the local project `home:in0rdr`, following error message will occur:
+```
+nothing provides obs-service-recompress
+```
+
+No further modifications needed, but needs to be available for the `diary-nightly` for compression services:
+```bash
+# home:in0rdr/diary-nightly/_service
+<services>
+  <service mode="buildtime" name="recompress">
+    <param name="file">*.tar</param>
+    <param name="compression">gz</param>
+  </service>
+...
+</services>
+```
+
+This service is used in combination with the service [`tar_scm`](https://github.com/openSUSE/obs-service-tar_scm).
+
+### `openSUSE:Tools/obs-service-set_version`
+
+This service sets the version in the RPM spec or Debian changelog according to the latest source files downloaded from GitHub:
+https://github.com/openSUSE/obs-service-set_version
 
 ### `openSUSE:Factory/zstd` OBS Package
 

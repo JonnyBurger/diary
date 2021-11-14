@@ -7,12 +7,10 @@ The OBS project [`home:in0rdr`](https://build.opensuse.org/project/show/home:in0
 > ℹ️ `diary-nightly` is not branched from `diary`, it has a completely separate build config.
 
 Additionally, these packages are being used as dependency for `diary-nightly`, to download the latest diary source code from the GitHub master branch:
-* `obs-service-recompress`
-* `obs-service-set_version`
-* `obs-service-tar_scm`
-* `zstd`
+* [`openSUSE:Tools/obs-service-tar_scm`](https://github.com/openSUSE/obs-service-tar_scm): Use `obs_scm` to fetch latest GitHub sources
 
-The remaining sections below describe the purpose of the source services and how they are used for the `diary-nightly` build (dependencies).
+* [`openSUSE:Tools/obs-service-recompress`](https://github.com/openSUSE/obs-service-recompress): Re-compress downloaded GitHub source files
+* [`openSUSE:Tools/obs-service-set_version`](https://github.com/openSUSE/obs-service-set_version): Set dynamic version based on information (`.obsinfo` file) from the GitHub checkout
 
 ## OBS Project Configuration
 
@@ -37,8 +35,9 @@ The documentation on how to use source services is sparse and scattered:
 * https://github.com/openSUSE/obs-service-tar_scm/issues/223
 * https://build.opensuse.org/package/view_file/OBS:Server:Unstable/obs-service-tar_scm/_service?expand=1
 
+The purpose of the source services and how they are used for the `diary-nightly` build (dependencies) is documented below.
 
-## `obs-service-recompress`
+### `openSUSE:Tools/obs-service-recompress`
 
 https://github.com/openSUSE/obs-service-recompress
 
@@ -63,11 +62,12 @@ No further modifications needed, but needs to be available for the `diary-nightl
 
 This service is used in combination with the service [`tar_scm`](https://github.com/openSUSE/obs-service-tar_scm).
 
-## `obs-service-set_version`
+### `openSUSE:Tools/obs-service-set_version`
 
+This service sets the version in the RPM spec or Debian changelog according to the latest source files downloaded from GitHub:
 https://github.com/openSUSE/obs-service-set_version
 
-## `obs-service-tar_scm`
+### `openSUSE:Tools/obs-service-tar_scm`
 
 Fix build for CentOS 8 by applying this patch in `obs-service-tar_scm.spec`:
 * https://github.com/openSUSE/obs-service-tar_scm/issues/374
@@ -106,12 +106,23 @@ Applying the latest version fixes the following issue:
 The following patch might be related (needs to be applied OBS server-side, nothing left to do):
 https://github.com/openSUSE/obs-build/pull/696
 
-## `zstd`
-> ❓ is the `zstd` package really required for the build? `obs-service-recompress` uses `tar.gz` compression.
+### `openSUSE:Factory/zstd` OBS Package
 
-> - [ ] check download page: https://software.opensuse.org/download.html?project=home%3Ain0rdr&package=diary-nightly
+> ℹ️ This OBS package is not strictly required (no branching needed) with `tar.gz` compression in the source service (`_service`).
 
-If `diary-nightly` for ArchLinux is built with `tar.gz` compression, the build will not be shown on the [download page](https://software.opensuse.org//download.html?project=home%3Ain0rdr&package=diary-nightly) because the download button for ArchLinux is missing, see also:
+Patch `zstd.spec`, such that RHEL build require `glibc-static` and openSUSE builds require `glibc-devel-static`:
+```diff
+- BuildRequires:  (glibc-static or glibc-devel-static)
++ %if 0%{?rhel} || 0%{?fedora}
++ BuildRequires:  glibc-static
++ %else
++ BuildRequires:  glibc-devel-static
++ %endif
+```
+
+## `zstd` Compression in the ArchLinux PKGBUILD
+
+If `diary-nightly` for ArchLinux is built with `tar.gz` compression, the build will not be shown on the [download page](https://software.opensuse.org//download.html?project=home%3Ain0rdr&package=diary-nightly) and the download button for ArchLinux is missing, see also:
 * https://github.com/in0rdr/diary/issues/64
 * https://github.com/openSUSE/software-o-o/issues/844
 * https://github.com/openSUSE/open-build-service/pull/10570
@@ -128,14 +139,4 @@ If the ZST compression (new defacto standard since [2020-01-04](https://archlinu
 
 ```
 PKGEXT='.pkg.tar.xz'
-```
-
-Patch `zstd.spec`, such that RHEL build require `glibc-static` and openSUSE builds require `glibc-devel-static`:
-```diff
-- BuildRequires:  (glibc-static or glibc-devel-static)
-+ %if 0%{?rhel} || 0%{?fedora}
-+ BuildRequires:  glibc-static
-+ %else
-+ BuildRequires:  glibc-devel-static
-+ %endif
 ```

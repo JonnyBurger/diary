@@ -15,7 +15,7 @@ https://openbuildservice.org/help/manuals/obs-user-guide/cha.obs.scm_ci_workflow
 A workflow token can be created as follows:
 ```bash
 # https://openbuildservice.org/2021/05/31/scm-integration/
-$ osc api -X POST "/person/in0rdr/token?operation=workflowscm_token=$(pwgen 24 1)"
+$ osc api -X POST "/person/in0rdr/token?project=home:in0rdr&package=diary-nightly&operation=workflow&scm_token=$(pwgen 24 1)"
 ```
 
 To list existing tokens, visit:

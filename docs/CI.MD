@@ -7,6 +7,9 @@ These jobs are called "workflows" in the OpenSuse Build Service and they are sto
 
 The documentation for this kind of "workflow" can be found in the [GitHub repository of the Open Build Service](https://github.com/openSUSE/open-build-service/wiki/Better-SCM-CI-Integration) and in a [series of blog posts on "SCM integration"](https://openbuildservice.org/blog).
 
+A new chapter in the documentation was written Nov 2021 which explains the purpose and usage of OBS workflows in detail:
+https://openbuildservice.org/help/manuals/obs-user-guide/cha.obs.scm_ci_workflow_integration.html
+
 ## GitHub Action to Verify Build
 
 [`.github/workflows/c.yml`](../.github/workflows/c.yml) implements a GitHub action to run the simple series of build steps (`make && make install`) for new commits and pull requests on the `master` branch.

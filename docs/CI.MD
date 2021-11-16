@@ -18,6 +18,16 @@ A workflow token can be created as follows:
 $ osc api -X POST "/person/in0rdr/token?operation=workflowscm_token=$(pwgen 24 1)"
 ```
 
+To list existing tokens, visit:
+https://build.opensuse.org/my/tokens
+
+Or list via CLI:
+```bash
+$ osc token list
+```
+
+The value of the token is configured on the VCS side.
+
 ## GitHub Action to Verify Build
 
 [`.github/workflows/c.yml`](../.github/workflows/c.yml) implements a GitHub action to run the simple series of build steps (`make && make install`) for new commits and pull requests on the `master` branch.

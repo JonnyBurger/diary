@@ -10,6 +10,14 @@ The documentation for this kind of "workflow" can be found in the [GitHub reposi
 A new chapter in the documentation was written Nov 2021 which explains the purpose and usage of OBS workflows in detail:
 https://openbuildservice.org/help/manuals/obs-user-guide/cha.obs.scm_ci_workflow_integration.html
 
+### Create OBS Workflow Token
+
+A workflow token can be created as follows:
+```bash
+# https://openbuildservice.org/2021/05/31/scm-integration/
+$ osc api -X POST "/person/in0rdr/token?operation=workflowscm_token=$(pwgen 24 1)"
+```
+
 ## GitHub Action to Verify Build
 
 [`.github/workflows/c.yml`](../.github/workflows/c.yml) implements a GitHub action to run the simple series of build steps (`make && make install`) for new commits and pull requests on the `master` branch.

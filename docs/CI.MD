@@ -12,10 +12,12 @@ https://openbuildservice.org/help/manuals/obs-user-guide/cha.obs.scm_ci_workflow
 
 ### Create OBS Workflow Token
 
+The `$token` is a 24 char [personal Git access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token).
+
 A workflow token can be created as follows:
 ```bash
 # https://openbuildservice.org/2021/05/31/scm-integration/
-$ osc api -X POST "/person/in0rdr/token?project=home:in0rdr&package=diary-nightly&operation=workflow&scm_token=$(pwgen 24 1)"
+$ osc api -X POST "/person/in0rdr/token?project=home:in0rdr&package=diary-nightly&operation=workflow&scm_token=$token"
 ```
 
 To list existing tokens, visit:

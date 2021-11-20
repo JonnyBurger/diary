@@ -583,19 +583,6 @@ int main(int argc, char** argv) {
                         const time_t ONE_DAY = 24 * 60 * 60 ;
                         time_t new_date = mktime(&curs_date) + (diff_days * ONE_DAY);
                         mv_valid = go_to(cal, aside, new_date, &pad_pos, &curs_date, &cal_start, &cal_end);
-
-
-                        // // remove the STANDOUT attribute from the day we are leaving
-                        // chtype current_attrs = mvwinch(cal, cy, cx) & A_ATTRIBUTES;
-                        // // leave every attr as is, but turn off STANDOUT
-                        // current_attrs &= ~A_STANDOUT;
-                        // mvwchgat(cal, cy, cx, 2, current_attrs, 0, NULL);
-
-                        // // add the STANDOUT attribute to the day we are entering
-                        // chtype new_attrs =  mvwinch(cal, pad_pos - 1 + event.y, event.x - ASIDE_WIDTH) & A_ATTRIBUTES;
-                        // new_attrs |= A_STANDOUT;
-                        // mvwchgat(cal, pad_pos - 1 + event.y, event.x - ASIDE_WIDTH, 2, new_attrs, 0, NULL);
-                        // prefresh(cal, pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
                     }
                 }
                 break;

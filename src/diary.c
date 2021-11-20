@@ -583,6 +583,8 @@ int main(int argc, char** argv) {
                         time_t new_date = mktime(&curs_date) + (diff_days * ONE_DAY);
                         mv_valid = go_to(cal, aside, new_date, &pad_pos, &curs_date, &cal_start, &cal_end);
                     }
+                } else if (event.bstate & BUTTON5_PRESSED) {
+                    fprintf(stderr, "Mouse up/down\n");
                 }
                 break;
 

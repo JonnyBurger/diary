@@ -460,6 +460,8 @@ int main(int argc, char** argv) {
     WINDOW* prev = newwin(prev_height, prev_width, 1, ASIDE_WIDTH + CAL_WIDTH);
     display_entry(CONFIG.dir, diary_dir_size, &today, prev, prev_width);
 
+    mousemask(ALL_MOUSE_EVENTS, NULL);
+    MEVENT event;
 
     do {
         ch = wgetch(cal);
@@ -537,6 +539,67 @@ int main(int argc, char** argv) {
                 }
                 curs_set(0);
                 break;
+            // jump to specific date using the mouse
+            case KEY_MOUSE:
+                if(getmouse(&event) == OK) {
+                    // when left mouse button pressed
+                    if(event.bstate & BUTTON1_CLICKED) {
+                        fprintf(stderr, "Button 1 clicked\n");
+                        int cy, cx;
+                        getyx(cal, cy, cx);
+                        int pad_cy = cy - pad_pos + 1;
+                        int pad_cx = cx + ASIDE_WIDTH;
+
+                        fprintf(stderr, "event.x %i\n", event.x);
+                        fprintf(stderr, "pad_cx %i\n", pad_cx);
+                        fprintf(stderr, "event.y %i\n", event.y);
+                        fprintf(stderr, "pad_cy %i\n", pad_cy);
+
+                        int diff_weeks = abs(pad_cy - event.y);
+                        fprintf(stderr, "Diff weeks: %i\n", diff_weeks);
+                        int diff_wdays = abs((pad_cx - event.x) / 3);
+                        fprintf(stderr, "Diff wdays: %i\n", diff_wdays);
+
+                        int diff_days;
+                        if (pad_cy > event.y) {
+                            // old position cy is more recent, jump backward by diff_days
+                            diff_days = - (diff_weeks * 7 - diff_wdays);
+                        } else if (pad_cy == event.y) {
+                            fprintf(stderr, "Move within same week\n");
+                            // move within same week
+                            if (cx > event.x) {
+                                // jump backwards, mouse click was before previous position
+                                diff_days = - diff_wdays;
+                            } else {
+                                diff_days = diff_wdays;
+                            }
+                        } else {
+                            // old position cy is before new y event, jump forward by diff_days
+                            diff_days = diff_weeks * 7 + diff_wdays;
+                        }
+                        fprintf(stderr, "Diff days: %i\n", diff_days);
+
+
+                        const time_t ONE_DAY = 24 * 60 * 60 ;
+                        time_t new_date = mktime(&curs_date) + (diff_days * ONE_DAY);
+                        mv_valid = go_to(cal, aside, new_date, &pad_pos, &curs_date, &cal_start, &cal_end);
+
+
+                        // // remove the STANDOUT attribute from the day we are leaving
+                        // chtype current_attrs = mvwinch(cal, cy, cx) & A_ATTRIBUTES;
+                        // // leave every attr as is, but turn off STANDOUT
+                        // current_attrs &= ~A_STANDOUT;
+                        // mvwchgat(cal, cy, cx, 2, current_attrs, 0, NULL);
+
+                        // // add the STANDOUT attribute to the day we are entering
+                        // chtype new_attrs =  mvwinch(cal, pad_pos - 1 + event.y, event.x - ASIDE_WIDTH) & A_ATTRIBUTES;
+                        // new_attrs |= A_STANDOUT;
+                        // mvwchgat(cal, pad_pos - 1 + event.y, event.x - ASIDE_WIDTH, 2, new_attrs, 0, NULL);
+                        // prefresh(cal, pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
+                    }
+                }
+                break;
+
             // today shortcut
             case 't':
                 new_date = today;

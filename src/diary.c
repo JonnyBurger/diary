@@ -560,22 +560,21 @@ int main(int argc, char** argv) {
                         int diff_wdays = abs((pad_cx - event.x) / 3);
                         fprintf(stderr, "Diff wdays: %i\n", diff_wdays);
 
-                        int diff_days;
+                        int diff_days = 0;
                         if (pad_cy > event.y) {
-                            // old position cy is more recent, jump backward by diff_days
-                            diff_days = - (diff_weeks * 7 - diff_wdays);
-                        } else if (pad_cy == event.y) {
-                            fprintf(stderr, "Move within same week\n");
-                            // move within same week
-                            if (cx > event.x) {
-                                // jump backwards, mouse click was before previous position
-                                diff_days = - diff_wdays;
-                            } else {
-                                diff_days = diff_wdays;
-                            }
+                            // current position cy is more recent, jump backward by diff_days
+                            diff_days -= diff_weeks * 7;
                         } else {
-                            // old position cy is before new y event, jump forward by diff_days
-                            diff_days = diff_weeks * 7 + diff_wdays;
+                            // new y event is more recent, jump forward by diff_days
+                            diff_days = diff_weeks * 7;
+                        }
+
+                        if (cx > event.x) {
+                            // jump backwards, mouse click was before current position
+                            diff_days -= diff_wdays;
+                        } else {
+                            // jump forward, mouse click was after current position
+                            diff_days += diff_wdays;
                         }
                         fprintf(stderr, "Diff days: %i\n", diff_days);
 

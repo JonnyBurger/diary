@@ -543,8 +543,8 @@ int main(int argc, char** argv) {
             case KEY_MOUSE:
                 if(getmouse(&event) == OK) {
                     // when left mouse button pressed
+                    fprintf(stderr, "Button event: %i\n", event.bstate);
                     if(event.bstate & BUTTON1_CLICKED) {
-                        fprintf(stderr, "Button 1 clicked\n");
                         int cy, cx;
                         getyx(cal, cy, cx);
                         int pad_cy = cy - pad_pos + 1;

@@ -416,9 +416,11 @@ int main(int argc, char** argv) {
         closedir(diary_dir_ptr);
     } else if (errno == ENOENT) {
         fprintf(stderr, "The directory '%s' does not exist\n", CONFIG.dir);
+        free(config_file_path);
         return 2;
     } else {
         fprintf(stderr, "The directory '%s' could not be opened\n", CONFIG.dir);
+        free(config_file_path);
         return 1;
     }
 

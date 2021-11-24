@@ -11,6 +11,11 @@ make debug
 valgrind --leak-check=full ./diary tmp-journal/ 2>log.txt
 ```
 
+https://developers.redhat.com/blog/2021/04/23/valgrind-memcheck-different-ways-to-lose-your-memory#generating_a_leak_summary
+
+Don't use `--show-leak-kinds=all` with Ncurses:
+https://invisible-island.net/ncurses/ncurses.faq.html#config_leaks
+
 ## Compile with Debug Symbols
 
 To make a build with debug symbols use the `debug` target:

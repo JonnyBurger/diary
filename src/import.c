@@ -78,6 +78,7 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
 
         if (conf_ch == 'y' || conf_ch == 'Y' || conf_ch == 'a' || conf_ch == '\n') {
             pthread_create(&progress_tid, NULL, show_progress, (void*)header);
+            pthread_detach(progress_tid);
 
             // persist VEVENT to local file
             FILE* cursordate_file = fopen(path, "wb");
@@ -109,8 +110,8 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
                     wchgat(cal, 2, atrs | A_BOLD, 0, NULL);
                     prefresh(cal, *pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
                 }
-                pthread_cancel(progress_tid);
             }
+            pthread_cancel(progress_tid);
         }
 
         // fprintf(stderr, "Import DTSTART: %s\n", desc);

@@ -624,6 +624,7 @@ int caldav_sync(struct tm* date,
     }
 
     pthread_create(&progress_tid, NULL, show_progress, (void*)header);
+    pthread_detach(progress_tid);
 
     char* principal_postfields = "<d:propfind xmlns:d='DAV:' xmlns:cs='http://calendarserver.org/ns/'>"
                                  "<d:prop><d:current-user-principal/></d:prop>"

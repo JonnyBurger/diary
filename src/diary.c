@@ -578,9 +578,8 @@ int main(int argc, char** argv) {
                         }
                         fprintf(stderr, "Diff days: %i\n", diff_days);
 
-
-                        const time_t ONE_DAY = 24 * 60 * 60 ;
-                        time_t new_date = mktime(&curs_date) + (diff_days * ONE_DAY);
+                        curs_date.tm_mday += diff_days;
+                        time_t new_date = mktime(&curs_date);
                         mv_valid = go_to(cal, aside, new_date, &pad_pos, &curs_date, &cal_start, &cal_end);
                     }
                 } else if (event.bstate & BUTTON5_PRESSED) {

@@ -38,6 +38,9 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
         vevent_date = extract_ical_field(i, "DTSTART", &search_pos, false);
         vevent_desc = extract_ical_field(i, "DESCRIPTION", &search_pos, true);
         if (vevent == NULL || vevent_desc == NULL) {
+            free(vevent);
+            free(vevent_date);
+            free(vevent_desc);
             break;
         }
 
@@ -56,7 +59,9 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
         fprintf(stderr, "Import date file path: %s\n", path);
 
         if (conf_ch == 'c') {
-            // cancel all
+            free(vevent);
+            free(vevent_date);
+            free(vevent_desc);
             break;
         }
 
@@ -111,9 +116,9 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
         // fprintf(stderr, "Import DTSTART: %s\n", desc);
         // fprintf(stderr, "Import DESCRIPTION: %s\n", desc);
         fprintf(stderr, "* * * * * * * * * * * * * \n");
+        free(vevent);
+        free(vevent_date);
+        free(vevent_desc);
     }
-    free(vevent);
-    free(vevent_date);
-    free(vevent_desc);
     free(ics);
 }

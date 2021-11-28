@@ -547,43 +547,63 @@ int main(int argc, char** argv) {
                     // when left mouse button pressed
                     fprintf(stderr, "Button event: %i\n", event.bstate);
                     click_in_calwin = wenclose(cal, event.y, event.x);
-                    if(click_in_calwin && event.bstate & (BUTTON1_PRESSED|BUTTON1_CLICKED)) {
-                        int cy, cx;
-                        getyx(cal, cy, cx);
-                        int pad_cy = cy - pad_pos + 1;
-                        int pad_cx = cx + ASIDE_WIDTH;
+                    if (click_in_calwin) {
+                        if(event.bstate & (BUTTON1_PRESSED|BUTTON1_CLICKED)) {
+                            // regular left-mouse button click or tap on a touchpad:
+                            //   BUTTON1_PRESSED detects touch events (touch pads)
+                            //   BUTTON1_CLICKED detects click events (mouse)
+                            int cy, cx;
+                            getyx(cal, cy, cx);
+                            int pad_cy = cy - pad_pos + 1;
+                            int pad_cx = cx + ASIDE_WIDTH;
 
-                        fprintf(stderr, "event.x %i\n", event.x);
-                        fprintf(stderr, "pad_cx %i\n", pad_cx);
-                        fprintf(stderr, "event.y %i\n", event.y);
-                        fprintf(stderr, "pad_cy %i\n", pad_cy);
+                            fprintf(stderr, "event.x %i\n", event.x);
+                            fprintf(stderr, "pad_cx %i\n", pad_cx);
+                            fprintf(stderr, "event.y %i\n", event.y);
+                            fprintf(stderr, "pad_cy %i\n", pad_cy);
 
-                        int diff_weeks = abs(pad_cy - event.y);
-                        fprintf(stderr, "Diff weeks: %i\n", diff_weeks);
-                        int diff_wdays = abs((pad_cx - event.x) / 3);
-                        fprintf(stderr, "Diff wdays: %i\n", diff_wdays);
+                            int diff_weeks = abs(pad_cy - event.y);
+                            fprintf(stderr, "Diff weeks: %i\n", diff_weeks);
+                            int diff_wdays = abs((pad_cx - event.x) / 3);
+                            fprintf(stderr, "Diff wdays: %i\n", diff_wdays);
 
-                        int diff_days = 0;
-                        if (pad_cy > event.y) {
-                            // current position cy is more recent, jump backward by diff_days
-                            diff_days -= diff_weeks * 7;
-                        } else {
-                            // new y event is more recent, jump forward by diff_days
-                            diff_days = diff_weeks * 7;
+                            int diff_days = 0;
+                            if (pad_cy > event.y) {
+                                // current position cy is more recent, jump backward by diff_days
+                                diff_days -= diff_weeks * 7;
+                            } else {
+                                // new y event is more recent, jump forward by diff_days
+                                diff_days = diff_weeks * 7;
+                            }
+
+                            if (cx > event.x) {
+                                // jump backwards, mouse click was before current position
+                                diff_days -= diff_wdays;
+                            } else {
+                                // jump forward, mouse click was after current position
+                                diff_days += diff_wdays;
+                            }
+                            fprintf(stderr, "Diff days: %i\n", diff_days);
+
+                            curs_date.tm_mday += diff_days;
+                            time_t new_date = mktime(&curs_date);
+                            mv_valid = go_to(cal, aside, new_date, &pad_pos, &curs_date, &cal_start, &cal_end);
+
+                            if (event.bstate & (BUTTON1_DOUBLE_CLICKED)) {
+                                // unset previous click events
+                                event.bstate &= ~BUTTON1_DOUBLE_CLICKED;
+                                event.bstate &= ~BUTTON1_PRESSED;
+                                event.bstate &= ~BUTTON1_CLICKED;
+                                // simulate edit char to enter edit mode
+                                ungetch('e');
+                            }
                         }
-
-                        if (cx > event.x) {
-                            // jump backwards, mouse click was before current position
-                            diff_days -= diff_wdays;
-                        } else {
-                            // jump forward, mouse click was after current position
-                            diff_days += diff_wdays;
+                        if (event.bstate & (BUTTON1_DOUBLE_CLICKED)) {
+                            // double-click left-mouse button or double tap on a touchpad
+                            // simulate single-click to select the new date
+                            event.bstate |= BUTTON1_PRESSED;
+                            ungetmouse(&event);
                         }
-                        fprintf(stderr, "Diff days: %i\n", diff_days);
-
-                        curs_date.tm_mday += diff_days;
-                        time_t new_date = mktime(&curs_date);
-                        mv_valid = go_to(cal, aside, new_date, &pad_pos, &curs_date, &cal_start, &cal_end);
                     }
                 } else if (event.bstate & BUTTON5_PRESSED) {
                     fprintf(stderr, "Mouse up/down\n");

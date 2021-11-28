@@ -93,13 +93,13 @@ char* read_tokenfile() {
     }
 
     fseek(token_file, 0, SEEK_END);
-    token_bytes = ftell(token_file) + 1;
+    token_bytes = ftell(token_file);
     rewind(token_file);
 
     token_buf = malloc(token_bytes);
     if (token_buf != NULL) {
         fread(token_buf, sizeof(char), token_bytes, token_file);
-        token_buf[token_bytes] = '\0';
+        token_buf[token_bytes - 1] = '\0';
 
         access_token = extract_json_value(token_buf, "access_token", true);
 

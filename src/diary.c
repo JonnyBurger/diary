@@ -463,7 +463,6 @@ int main(int argc, char** argv) {
     mmask_t oldmask;
     mousemask(ALL_MOUSE_EVENTS, &oldmask);
     MEVENT event;
-    bool click_in_calwin = false;
 
     do {
         ch = wgetch(cal);
@@ -544,10 +543,8 @@ int main(int argc, char** argv) {
             // jump to specific date using the mouse
             case KEY_MOUSE:
                 if(getmouse(&event) == OK) {
-                    // when left mouse button pressed
-                    fprintf(stderr, "Button event: %i\n", event.bstate);
-                    click_in_calwin = wenclose(cal, event.y, event.x);
-                    if (click_in_calwin) {
+                    // fprintf(stderr, "Button event: %i\n", event.bstate);
+                    if (wenclose(cal, event.y, event.x)) {
                         if(event.bstate & (BUTTON1_PRESSED|BUTTON1_CLICKED)) {
                             // regular left-mouse button click or tap on a touchpad:
                             //   BUTTON1_PRESSED detects touch events (touch pads)

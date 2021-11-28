@@ -460,7 +460,8 @@ int main(int argc, char** argv) {
     WINDOW* prev = newwin(prev_height, prev_width, 1, ASIDE_WIDTH + CAL_WIDTH);
     display_entry(CONFIG.dir, diary_dir_size, &today, prev, prev_width);
 
-    mousemask(ALL_MOUSE_EVENTS, NULL);
+    mmask_t oldmask;
+    mousemask(ALL_MOUSE_EVENTS, &oldmask);
     MEVENT event;
     bool click_in_calwin = false;
 
@@ -642,7 +643,9 @@ int main(int argc, char** argv) {
                     break;
                 }
                 curs_set(1);
+                mousemask(oldmask, NULL);
                 system(ecmd);
+                mousemask(ALL_MOUSE_EVENTS, &oldmask);
                 curs_set(0);
                 keypad(cal, TRUE);
 

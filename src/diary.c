@@ -462,6 +462,7 @@ int main(int argc, char** argv) {
 
     mousemask(ALL_MOUSE_EVENTS, NULL);
     MEVENT event;
+    bool click_in_calwin = false;
 
     do {
         ch = wgetch(cal);
@@ -544,7 +545,8 @@ int main(int argc, char** argv) {
                 if(getmouse(&event) == OK) {
                     // when left mouse button pressed
                     fprintf(stderr, "Button event: %i\n", event.bstate);
-                    if(event.bstate & (BUTTON1_PRESSED|BUTTON1_CLICKED)) {
+                    click_in_calwin = wenclose(cal, event.y, event.x);
+                    if(click_in_calwin && event.bstate & (BUTTON1_PRESSED|BUTTON1_CLICKED)) {
                         int cy, cx;
                         getyx(cal, cy, cx);
                         int pad_cy = cy - pad_pos + 1;

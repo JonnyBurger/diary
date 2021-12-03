@@ -81,7 +81,12 @@ void draw_calendar(WINDOW* number_pad, WINDOW* month_pad, const char* diary_dir,
 void display_entry(const char* dir, size_t dir_size, const struct tm* date, WINDOW* win, int width) {
     char path[100];
     char* ppath = path;
+    FILE* fp;
     int c;
+    char* entry;
+    char* fmtcmd;
+    size_t s, fmtcmd_s;
+    char* tmp_fmt_txt_file = "/tmp/diary_tmp_fmt_entry";
 
     // get entry path
     fpath(dir, dir_size, date, &ppath, sizeof path);
@@ -93,13 +98,48 @@ void display_entry(const char* dir, size_t dir_size, const struct tm* date, WIND
     wclear(win);
 
     if (date_has_entry(dir, dir_size, date)) {
-        FILE* fp = fopen(path, "r");
-        if (fp == NULL) perror("Error opening file");
-
         wmove(win, 0, 0);
-        while((c = getc(fp)) != EOF) waddch(win, c);
 
-        fclose(fp);
+        if (strcmp(CONFIG.fmt_cmd, "") == 0) {
+            // no formatting command defined, read and print lines
+            fp = fopen(path, "r");
+            while((c = getc(fp)) != EOF) waddch(win, c);
+            fclose(fp);
+        } else {
+            // construct the formatting command
+            fmtcmd_s = strlen(CONFIG.fmt_cmd) + strlen(path) + strlen(">") + strlen(tmp_fmt_txt_file) + 3;
+            fmtcmd = malloc(fmtcmd_s);
+            strcpy(fmtcmd, CONFIG.fmt_cmd);
+            strcat(fmtcmd, " ");
+            strcat(fmtcmd, path);
+            strcat(fmtcmd, " >");
+            strcat(fmtcmd, tmp_fmt_txt_file);
+
+            // format the entry
+            fprintf(stderr, "Fmt command: %s\n", fmtcmd);
+            system(fmtcmd);
+
+            // read formatted entry
+            FILE* fp = fopen(tmp_fmt_txt_file, "r");
+            if (fp == NULL) perror("Error opening file");
+
+            fseek(fp, 0, SEEK_END);
+            long entry_bytes = ftell(fp);
+            entry = calloc(entry_bytes + 1, sizeof(char));
+            rewind(fp);
+
+            // read formatted entry
+            s = fread(entry, 1, entry_bytes, fp);
+            fclose(fp);
+            remove(tmp_fmt_txt_file);
+
+            // display formatted entry
+            entry[s] = '\0';
+            waddstr(win, entry);
+
+            free(fmtcmd);
+            free(entry);
+        }
     }
 
     wrefresh(win);
@@ -216,6 +256,9 @@ bool read_config(const char* file_path) {
             } else if (strcmp("fmt", key_buf) == 0) {
                 CONFIG.fmt = (char *) malloc(strlen(value_buf) + 1 * sizeof(char));
                 strcpy(CONFIG.fmt, value_buf);
+            } else if (strcmp("fmt_cmd", key_buf) == 0) {
+                CONFIG.fmt_cmd = (char *) malloc(strlen(value_buf) + 1 * sizeof(char));
+                strcpy(CONFIG.fmt_cmd, value_buf);
             } else if (strcmp("editor", key_buf) == 0) {
                 CONFIG.editor = (char *) malloc(strlen(value_buf) + 1 * sizeof(char));
                 strcpy(CONFIG.editor, value_buf);
@@ -251,6 +294,7 @@ void usage() {
   printf("  -d, --dir           DIARY_DIR : Diary storage directory DIARY_DIR\n");
   printf("  -e, --editor        EDITOR    : Editor to open journal files with\n");
   printf("  -f, --fmt           FMT       : Date and file format, change with care\n");
+  printf("  -F, --fmt-cmd       FMT_CMD   : Format entry preview with command FMT_CMD\n");
   printf("  -r, --range         RANGE     : RANGE is the number of years to show before/after today's date\n");
   printf("  -w, --weekday       DAY       : First day of the week, 0 = Sun, 1 = Mon, ..., 6 = Sat\n");
   printf("\n");
@@ -345,6 +389,7 @@ int main(int argc, char** argv) {
             { "dir",           required_argument, 0, 'd' },
             { "editor",        required_argument, 0, 'e' },
             { "fmt",           required_argument, 0, 'f' },
+            { "fmt-cmd",       required_argument, 0, 'F' },
             { "range",         required_argument, 0, 'r' },
             { "weekday",       required_argument, 0, 'w' },
             { 0,               0,                 0,  0  }
@@ -352,7 +397,7 @@ int main(int argc, char** argv) {
 
         // read option characters
         while (1) {
-            option_char = getopt_long(argc, argv, "vhd:r:w:f:e:", long_options, &option_index);
+            option_char = getopt_long(argc, argv, "vhd:r:w:f:F:e:", long_options, &option_index);
 
             if (option_char == -1) {
                 break;
@@ -389,6 +434,11 @@ int main(int argc, char** argv) {
                     // set date format from option character
                     CONFIG.fmt = (char *) calloc(strlen(optarg) + 1, sizeof(char));
                     strcpy(CONFIG.fmt, optarg);
+                    break;
+                case 'F':
+                    // set formatting command
+                    CONFIG.fmt_cmd = (char *) calloc(strlen(optarg) + 1, sizeof(char));
+                    strcpy(CONFIG.fmt_cmd, optarg);
                     break;
                 case 'e':
                     // set default editor from option character

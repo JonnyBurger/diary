@@ -44,6 +44,9 @@ typedef struct
     int weekday;
     // 2020-12-31
     char* fmt;
+    // Text formatting command/utility fmt,
+    // default width 75 chars (-w75), do not refill lines (-s)
+    char* fmt_cmd;
     // Editor to open journal files with
     char* editor;
     // File for Google OAuth access token

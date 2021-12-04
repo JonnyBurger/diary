@@ -98,10 +98,13 @@ Note: for *BSD users run gmake.
    You can uninstall diary with `sudo make uninstall`.
 
 ## OBS Build Documentation
-[./docs/OBS.MD](./docs/OBS.MD)
+[./docs/OBS.md](./docs/OBS.md)
 
 ## GitHub Action CI Documentation
-[./docs/CI.MD](./docs/CI.MD)
+[./docs/CI.md](./docs/CI.md)
+
+## Test Documentation
+[./docs/TESTING.md](./docs/TESTING.md)
 
 ## Configuration File
 

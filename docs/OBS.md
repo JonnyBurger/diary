@@ -2,7 +2,7 @@
 
 The OBS project [`home:in0rdr`](https://build.opensuse.org/project/show/home:in0rdr) comprises following `diary` packages:
 * `diary`: Latest stable release built from tar.gz statically placed in the source
-* `diary-nightly`: Latest unstable build, re-built dynamically from the code on the GitHub master branch (see [./CI.MD](./CI.MD) for a description of the GitHub Actions)
+* `diary-nightly`: Latest unstable build, re-built dynamically from the code on the GitHub master branch (see [./CI.md](./CI.md) for a description of the GitHub Actions)
 
 > ℹ️ `diary-nightly` is not branched from `diary`, it has a completely separate build config.
 

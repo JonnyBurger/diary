@@ -282,7 +282,7 @@ char* extract_ical_field(const char* ics, char* key, long* start_pos, bool multi
 
 // Return expanded file path
 char* expand_path(const char* str) {
-    char* res;
+    char* res = "";
     wordexp_t str_wordexp;
     if ( wordexp( str, &str_wordexp, 0 ) == 0) {
         res = (char *) calloc(strlen(str_wordexp.we_wordv[0]) + 1, sizeof(char));

@@ -202,11 +202,11 @@ void get_access_token(char* code, char* verifier, bool refresh) {
 
         if (tokenfile == NULL) {
             perror("Failed to open tokenfile");
-        } else {
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, tokenfile);
-            res = curl_easy_perform(curl);
-            fclose(tokenfile);
+            return;
         }
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, tokenfile);
+        res = curl_easy_perform(curl);
+        fclose(tokenfile);
 
         curl_easy_cleanup(curl);
 
@@ -420,7 +420,7 @@ char* caldav_req(struct tm* date, char* url, char* http_method, char* postfields
         struct curl_slist *header = NULL;
         char bearer_token[strlen("Authorization: Bearer")+strlen(access_token)];
         sprintf(bearer_token, "Authorization: Bearer %s", access_token);
-        char depth_header[strlen("Depth: 0")];
+        char depth_header[strlen("Depth: 0")+1];
         sprintf(depth_header, "Depth: %i", depth);
         header = curl_slist_append(header, depth_header);
         header = curl_slist_append(header, bearer_token);
@@ -795,7 +795,7 @@ int caldav_sync(struct tm* date,
 
     char* rmt_desc;
     char dstr[16];
-    int conf_ch;
+    int conf_ch = 0;
     if (remote_file_exists && (timediff < 0 || !local_file_exists)) {
         rmt_desc = extract_ical_field(event, "DESCRIPTION", &search_pos, true);
         fprintf(stderr, "Remote event description:%s\n", rmt_desc);
@@ -819,42 +819,39 @@ int caldav_sync(struct tm* date,
         strftime(dstr, sizeof dstr, CONFIG.fmt, date);
         mvwprintw(header, 0, 0, "Remote event is more recent. Sync entry '%s' and overwrite local file? [(Y)es/(a)ll/(n)o/(c)ancel] ", dstr);
         char* i;
-        bool conf = false;
-        while (!conf) {
-            conf_ch = wgetch(header);
-            if (conf_ch == 'y' || conf_ch == 'Y' || 'a' || conf_ch == '\n' || !confirm) {
-                fprintf(stderr, "Remote file is newer, extracting description from remote...\n");
 
-                // persist downloaded buffer to local file
-                FILE* cursordate_file = fopen(path, "wb");
-                if (cursordate_file == NULL) {
-                    perror("Failed to open cursor date file");
-                } else {
-                    for (i = rmt_desc; *i != '\0'; i++) {
-                        if (rmt_desc[i-rmt_desc] == 0x5C) { // backslash
-                            switch (*(i+1)) {
-                                case 'n':
-                                    fputc('\n', cursordate_file);
-                                    i++;
-                                    break;
-                                case 0x5c: // preserve real backslash
-                                    fputc(0x5c, cursordate_file);
-                                    i++;
-                                    break;
-                            }
-                        } else {
-                            fputc(*i, cursordate_file);
+        conf_ch = wgetch(header);
+        if (conf_ch == 'y' || conf_ch == 'Y' || conf_ch == 'a' || conf_ch == '\n' || !confirm) {
+            fprintf(stderr, "Remote file is newer, extracting description from remote...\n");
+
+            // persist downloaded buffer to local file
+            FILE* cursordate_file = fopen(path, "wb");
+            if (cursordate_file == NULL) {
+                perror("Failed to open cursor date file");
+            } else {
+                for (i = rmt_desc; *i != '\0'; i++) {
+                    if (rmt_desc[i-rmt_desc] == 0x5C) { // backslash
+                        switch (*(i+1)) {
+                            case 'n':
+                                fputc('\n', cursordate_file);
+                                i++;
+                                break;
+                            case 0x5c: // preserve real backslash
+                                fputc(0x5c, cursordate_file);
+                                i++;
+                                break;
                         }
+                    } else {
+                        fputc(*i, cursordate_file);
                     }
                 }
-                fclose(cursordate_file);
-
-                // add new entry highlight
-                chtype atrs = winch(cal) & A_ATTRIBUTES;
-                wchgat(cal, 2, atrs | A_BOLD, 0, NULL);
-                prefresh(cal, pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
             }
-            break;
+            fclose(cursordate_file);
+
+            // add new entry highlight
+            chtype atrs = winch(cal) & A_ATTRIBUTES;
+            wchgat(cal, 2, atrs | A_BOLD, 0, NULL);
+            prefresh(cal, pad_pos, 0, 1, ASIDE_WIDTH, LINES - 1, ASIDE_WIDTH + CAL_WIDTH);
         }
 
         echo();

@@ -644,22 +644,20 @@ int caldav_sync(struct tm* date,
         user_principal = caldav_req(date, GOOGLE_CALDAV_URI, "PROPFIND", principal_postfields, 0);
     }
 
-    char* tokenfile_path = expand_path(CONFIG.google_tokenfile);
     if (user_principal == NULL) {
-        fprintf(stderr, "Unable to fetch principal. Offline or invalid tokenfile. Removing tokenfile '%s'.\n", CONFIG.google_tokenfile);
-
+        pthread_cancel(progress_tid);
         wclear(header);
-        mvwprintw(header, 0, 0, "Invalid Google OAuth2 credentials, removing tokenfile at '%s'. Please retry.", CONFIG.google_tokenfile);
+        wresize(header, LINES, getmaxx(header));
+        char* info_txt = "Offline or invalid Google OAuth2 credentials.\n"
+                         "Go online or delete tokenfile '%s' to retry login.\n"
+                         "Press any key to continue.";
+        mvwprintw(header, 0, 0, info_txt, CONFIG.google_tokenfile);
         wrefresh(header);
 
         // accept any input to proceed
         noecho();
         wgetch(header);
         echo();
-
-        if (unlink(tokenfile_path) == -1) {
-            perror("unlink tokenfile");
-        }
 
         free(access_token);
         access_token = NULL;

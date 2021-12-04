@@ -116,7 +116,6 @@ void display_entry(const char* dir, size_t dir_size, const struct tm* date, WIND
             strcat(fmtcmd, tmp_fmt_txt_file);
 
             // format the entry
-            fprintf(stderr, "Fmt command: %s\n", fmtcmd);
             system(fmtcmd);
 
             // read formatted entry
@@ -131,8 +130,10 @@ void display_entry(const char* dir, size_t dir_size, const struct tm* date, WIND
             // read formatted entry
             s = fread(entry, 1, entry_bytes, fp);
             fclose(fp);
-            remove(tmp_fmt_txt_file);
-
+            // remove(tmp_fmt_txt_file);
+            if (unlink(tmp_fmt_txt_file) == -1) {
+                perror("unlink tokenfile");
+            }
             // display formatted entry
             entry[s] = '\0';
             waddstr(win, entry);
@@ -235,6 +236,7 @@ bool read_config(const char* file_path) {
 
     char key_buf[80];
     char value_buf[80];
+    char* value_multiword;
     char line[256];
     FILE * pfile;
 
@@ -257,8 +259,11 @@ bool read_config(const char* file_path) {
                 CONFIG.fmt = (char *) malloc(strlen(value_buf) + 1 * sizeof(char));
                 strcpy(CONFIG.fmt, value_buf);
             } else if (strcmp("fmt_cmd", key_buf) == 0) {
-                CONFIG.fmt_cmd = (char *) malloc(strlen(value_buf) + 1 * sizeof(char));
-                strcpy(CONFIG.fmt_cmd, value_buf);
+                value_multiword = strstr(line, "="); // multiword value
+                value_multiword++; // strip the "="
+                value_multiword[strlen(value_multiword) - 1] = '\0'; // strip newline
+                CONFIG.fmt_cmd = (char *) malloc(strlen(value_multiword) + 1 * sizeof(char));
+                strcpy(CONFIG.fmt_cmd, value_multiword);
             } else if (strcmp("editor", key_buf) == 0) {
                 CONFIG.editor = (char *) malloc(strlen(value_buf) + 1 * sizeof(char));
                 strcpy(CONFIG.editor, value_buf);

@@ -18,7 +18,7 @@ void ics_import(const char* ics_input, WINDOW* header, WINDOW* cal, WINDOW* asid
     fread(ics, 1, ics_bytes, pfile);
     fclose(pfile);
 
-    ics[ics_bytes] = 0;
+    ics[ics_bytes] = '\0';
     // fprintf(stderr, "Import ICS file: %s\n", ics);
 
     int conf_ch = 0;

@@ -403,6 +403,7 @@ config CONFIG = {
     .range = 1,
     .weekday = 1,
     .fmt = "%Y-%m-%d",
+    .fmt_cmd = "",
     .editor = "",
     .google_tokenfile = GOOGLE_OAUTH_TOKEN_FILE,
     .google_clientid = GOOGLE_OAUTH_CLIENT_ID,

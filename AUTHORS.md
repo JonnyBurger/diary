@@ -7,3 +7,4 @@
 - Balduin Dettling (https://github.com/mbjd)
 - Avindra Goolcharan (https://github.com/avindra)
 - Oliver Blanthorn (https://github.com/bovine3dom)
+- Jonny Burger (https://github.com/JonnyBurger)

@@ -10,7 +10,8 @@
 * External text format command (#68, #80) --fmt-cmd
 * Mouse support for selecting dates (#60)
 * Documentation for build pipelines (CI/CD) and Open Build Service (OBS) jobs (`docs/CI.md` and `docs/OBS.md`)
-* Documentation of testing procedures (`docs/TESTING.md`)
+* Documentation of testing and debugging procedures (`docs/TESTING.md`)
+* Add `debug` target to `Makefile`
 
 ## [0.4] - 2020-10-17
 

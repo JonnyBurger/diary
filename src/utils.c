@@ -343,7 +343,6 @@ void fpath(const char* dir, size_t dir_size, const struct tm* date, char** rpath
 
 bool go_to(WINDOW* calendar, WINDOW* aside, time_t date, int* cur_pad_pos, struct tm* curs_date, struct tm* cal_start, struct tm* cal_end) {
     if (date < mktime(cal_start) || date > mktime(cal_end)) {
-        fprintf(stderr, "Invalid cursor move, return from go_to\n");
         return false;
     }
 

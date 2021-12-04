@@ -212,3 +212,13 @@ The application requires two [OAuth2 scopes](https://developers.google.com/calen
 
 1. `https://www.googleapis.com/auth/calendar`: read/write access to Calendars - required to discover the unique hyperlink/URI for the calendar specified by the [configuration key](#Configuration-File) `google_calendar`
 2. `https://www.googleapis.com/auth/calendar.events.owned`: read/write access to Events owned by the user - allows diary to create/read/update/delete events in `google_calendar`
+
+## License
+
+This work uses the MIT License. See [LICENSE](./LICENSE) for details.
+
+## Contributors
+
+All source code is available in this repository. Contributions are always welcome!
+
+For a list of contributors see the [AUTHORS.md](./AUTHORS.md).

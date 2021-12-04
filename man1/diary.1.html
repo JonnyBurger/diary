@@ -62,6 +62,13 @@ diary - Text-based journaling program
       Rename all files in the DIARY_DIR to migrate to a new FMT.</dd>
 </dl>
 <dl class="Bl-tag">
+  <dt><b>-F</b>, <b>--fmt-cmd</b>=<i>FMT_CMD</i></dt>
+  <dd>Journal entries are formatted with this command. If not set (default), the
+      characters are printed to the preview screen character by character
+      (without word wrap). For example, to enable word wrap after 75 characters,
+      use &quot;fmt -s&quot; as FMT_CMD.</dd>
+</dl>
+<dl class="Bl-tag">
   <dt><b>-r</b>, <b>--range</b>=<i>RANGE</i></dt>
   <dd>RANGE is the number of years to show before/after todays date. Defaults to
       1 year.</dd>
@@ -240,6 +247,8 @@ range = 1
 weekday = 1
 # Date and file format, change with care
 fmt = %Y-%m-%d
+# Text format command for entry preview
+fmt_cmd =
 # Editor to open journal files with
 editor =
 # Google calendar name for CalDAV sync
